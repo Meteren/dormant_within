@@ -21,7 +21,7 @@ public class Spot : MonoBehaviour
     {
         Vector3 deltaPos = lookAt.transform.position - capturedPosition;
         if (shouldLookAt && !isLookingAt)
-            CheckAndRotateIfNeeded(deltaPos);
+            CheckAndRotateIfNeeded(deltaPos);//no need it seems
         capturedPosition = lookAt.transform.position;
     }
     private void Update()
@@ -31,7 +31,12 @@ public class Spot : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("Player"))
+        {
+            cam.enabled = true;
             cam.Priority = 1;
+            
+        }
+           
     }
 
     private void OnTriggerExit(Collider other)
@@ -44,6 +49,8 @@ public class Spot : MonoBehaviour
         }
             
     }
+
+    //can be deleted later
     private void CheckAndRotateIfNeeded(Vector3 deltaPos)
     {
         Vector3 rotationDegrees = cam.transform.eulerAngles;
@@ -54,12 +61,13 @@ public class Spot : MonoBehaviour
             Vector2 xzFlat = new Vector2(deltaPos.x, deltaPos.z);
             float rotationDirection = Mathf.Sign(Vector3.Dot(cam.transform.forward, deltaPos)); 
 
-            rotationDegrees.x += rotationDirection * xzFlat.magnitude * rotationSpeed * Time.deltaTime;
+            rotationDegrees.x += -1 * rotationDirection * xzFlat.magnitude * rotationSpeed * Time.deltaTime;
         }
 
         cam.transform.rotation = Quaternion.Euler(rotationDegrees);
     }
 
+    //including this 
     private float CalculateDistanceToRotate()
     {
         float distance = Vector3.Distance(lookAt.transform.position, cam.transform.position);
@@ -71,6 +79,7 @@ public class Spot : MonoBehaviour
         cam.transform.rotation = Quaternion.Euler(originalRotationVals);
         if(!isLookingAt)
             cam.LookAt = null;
+        cam.enabled = false;
     }
    
 }
