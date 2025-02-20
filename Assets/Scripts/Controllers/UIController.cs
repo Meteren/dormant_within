@@ -8,7 +8,6 @@ public class UIController : Singleton<UIController>
 
     private void Update()
     {
-        if (GetInstance != null)
-            Debug.Log("not Null");
+        
     }
 }
