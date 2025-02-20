@@ -14,7 +14,7 @@ public abstract class Item : MonoBehaviour, ICollectible
         if (itemCollected)
         {
             transform.Rotate(0, Time.deltaTime * rotationSpeed, 0);
-            if (Input.GetKeyDown(KeyCode.E))
+            if (Input.GetKeyDown(KeyCode.Q))
             {
                 //inventory handler will take place later instead
                 //for now set inactive
