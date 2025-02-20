@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-
 public abstract class Item : MonoBehaviour, ICollectible
 {
     protected float distanceFromCam = 2;
@@ -15,7 +14,7 @@ public abstract class Item : MonoBehaviour, ICollectible
         if (itemCollected)
         {
             transform.Rotate(0, Time.deltaTime * rotationSpeed, 0);
-            if (Input.GetKeyDown(KeyCode.V))
+            if (Input.GetKeyDown(KeyCode.E))
             {
                 //inventory handler will take place later instead
                 //for now set inactive
@@ -33,7 +32,6 @@ public abstract class Item : MonoBehaviour, ICollectible
         HandleItemCheckPanel();
     }
 
-  
     private void ScaleToFitCamera()
     {
         Bounds bound = coll.bounds;
@@ -42,11 +40,9 @@ public abstract class Item : MonoBehaviour, ICollectible
 
         float objectSize = Mathf.Max(objectSizes.x, objectSizes.y, objectSizes.z);
 
-        Debug.Log(objectSizes);
+        float cameraView = Mathf.Tan(0.5f * Mathf.Deg2Rad * Camera.main.fieldOfView);
 
-        float cameraView = 2.0f * Mathf.Tan(0.5f * Mathf.Deg2Rad * Camera.main.fieldOfView);
-
-        float distance = objectSize / cameraView;
+        float distance = (objectSize * 0.5f) / cameraView;
 
         float scaleFactor = distanceFromCam / distance;
 
