@@ -7,14 +7,15 @@ public class UIManager : Singleton<UIManager>
     public GameObject itemCollectedPanel;
     public GameObject inventory;
 
-    bool inventoryActive;
+    [Header("Conditions")]
+    [SerializeField] private bool inventoryActive;
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             inventoryActive = !inventoryActive;
-            inventory.SetActive(inventory);    
+            inventory.SetActive(inventoryActive);    
         }
           
     }
