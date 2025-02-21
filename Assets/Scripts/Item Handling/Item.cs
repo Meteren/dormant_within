@@ -1,14 +1,25 @@
 using TMPro;
 using UnityEngine;
-public abstract class Item : MonoBehaviour, ICollectible
+public abstract class Item : MonoBehaviour, ICollectible, IInspectable
 {
-    protected float distanceFromCam = 2;
-    [SerializeField] protected string onFoundToSay;
+    [HideInInspector] public float distanceFromCam = 2;
+
     [SerializeField] protected float scaleOffset;
     [SerializeField] protected Collider coll;
     [SerializeField] protected float rotationSpeed;
+
     [Header("Conditions")]
     [SerializeField] private bool itemCollected;
+
+    [Header("Texts")]
+    [SerializeField] protected string onFoundToSay;
+    [SerializeField] protected string onInspectToSay;
+
+    [Header("Item Image")]
+    public Sprite itemImage;
+
+    [Header("Inventory Controller")]
+    [SerializeField] private InventoryController inventoryController;
     private void Update()
     {
         if (itemCollected)
@@ -16,10 +27,18 @@ public abstract class Item : MonoBehaviour, ICollectible
             transform.Rotate(0, Time.deltaTime * rotationSpeed, 0);
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                //inventory handler will take place later instead
-                //for now set inactive
-                UIController.GetInstance.itemCollectedPanel.SetActive(false);
-                Destroy(gameObject);
+               
+                if (inventoryController.TryAttachCollectedItemToGrid(this))
+                {
+                    //indicate that item is collected via UIManager
+                    UIManager.GetInstance.itemCollectedPanel.SetActive(false);
+                    gameObject.SetActive(false);
+                }
+                else
+                {
+
+                }
+                    
             }
         }
             
@@ -30,6 +49,10 @@ public abstract class Item : MonoBehaviour, ICollectible
         ScaleToFitCamera();
         InitRotation();
         HandleItemCheckPanel();
+    }
+    public void OnInspect(TextMeshProUGUI toSay)
+    {
+        toSay.text = onInspectToSay;
     }
 
     private void ScaleToFitCamera()
@@ -62,8 +85,8 @@ public abstract class Item : MonoBehaviour, ICollectible
     public void HandleItemCheckPanel()
     {
 
-        UIController.GetInstance.itemCollectedPanel.GetComponentInChildren<TextMeshProUGUI>().text = onFoundToSay;
-        UIController.GetInstance.itemCollectedPanel.SetActive(true);
+        UIManager.GetInstance.itemCollectedPanel.GetComponentInChildren<TextMeshProUGUI>().text = onFoundToSay;
+        UIManager.GetInstance.itemCollectedPanel.SetActive(true);
     }
     private void OnValidate()
     {
@@ -74,5 +97,4 @@ public abstract class Item : MonoBehaviour, ICollectible
         return;
     }
 
-   
 }

@@ -1,5 +1,7 @@
 
-public interface IInteractable
+using TMPro;
+
+public interface IInspectable
 {
-    void OnOnteract();   
+    void OnInspect(TextMeshProUGUI toSay);   
 }

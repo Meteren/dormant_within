@@ -1,13 +1,15 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InspectorScene : MonoBehaviour
+public class InspectorSceneController : MonoBehaviour
 {
     public Camera inspectorCam;
     public Transform objectToBeInspected;
     private Vector3 lastMousePosition;
     private RawImage rawImage;
     [SerializeField] private float rotationSpeed;
+    [SerializeField] private TextMeshProUGUI inspectionText;
     [Header("Conditions")]
     [SerializeField] private bool isPressed;
 
@@ -20,24 +22,25 @@ public class InspectorScene : MonoBehaviour
     {
         if (CastRayAndCheckIfInBoundaries(out Ray ray))
         {
-
-            if (Input.GetMouseButtonDown(0))
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide) &&
+                Input.GetMouseButtonDown(0))
+            {
+                Debug.Log($"Hitted object: {hit.transform.name}");
+                if (hit.transform.TryGetComponent<IInspectable>(out IInspectable interactedPart))
+                {
+                    interactedPart.OnInspect(inspectionText);
+                }
+            }
+            if (Input.GetMouseButtonDown(1))
             {
                 isPressed = true;
                 lastMousePosition = Input.mousePosition;
-                if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide))
-                {
-                    Debug.Log($"Hitted object: {hit.transform.name}");
-                    if (hit.transform.TryGetComponent<IInteractable>(out IInteractable interactedPart))
-                    {
-                        interactedPart.OnOnteract();
-                    }
-                }
+               
             }
 
         }
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(1))
             isPressed = false;
 
         if (isPressed && objectToBeInspected != null)
@@ -69,7 +72,6 @@ public class InspectorScene : MonoBehaviour
       
         ray = inspectorCam.ViewportPointToRay(viewportPoint);
       
-
         return isInBoundaries;
     }
 }
