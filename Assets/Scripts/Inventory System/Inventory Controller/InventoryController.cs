@@ -4,9 +4,24 @@ using UnityEngine.UI;
 
 public class InventoryController : MonoBehaviour
 {
-    [SerializeField] private List<Grid> inventoryGrids;
+    [SerializeField] private List<InventoryGrid> inventoryGrids;
+    public GridMenu gridMenu;
 
-    public bool TryGetGrid(ItemRepresenter representer, out Grid gridToGet)
+    private void Update()
+    {
+        if(Input.GetMouseButtonDown(0) && !CheckIfMouseInsideMenu())
+            gridMenu.gameObject.SetActive(false);
+    }
+
+
+    private bool CheckIfMouseInsideMenu()
+    {
+        bool isInside = 
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(gridMenu.rectTransform, 
+            Input.mousePosition, null, out Vector2 localPoint);
+        return gridMenu.rectTransform.rect.Contains(localPoint) && isInside;
+    }
+    public bool TryGetGrid(ItemRepresenter representer, out InventoryGrid gridToGet)
     {
         Vector2 representerScreenPoint = representer.rectTransform.position;
         foreach(var grid in inventoryGrids)
@@ -27,14 +42,14 @@ public class InventoryController : MonoBehaviour
 
     public bool TryAttachCollectedItemToGrid(Item item)
     {
-        if(TryGetEmptyGrid(out Grid grid))
+        if(TryGetEmptyGrid(out InventoryGrid grid))
         {
             GameObject itemRepresenter = new GameObject(item.name);
             itemRepresenter.AddComponent<CanvasRenderer>();
             itemRepresenter.AddComponent<RectTransform>();
             itemRepresenter.AddComponent<Image>();
             ItemRepresenter representer = itemRepresenter.AddComponent<ItemRepresenter>();
-            representer.InitRepresenter(item,grid,this);
+            representer.InitRepresenter(item,grid,this,item.cameraFOVLookingAtObject);
             return true;
         }
         else
@@ -45,7 +60,7 @@ public class InventoryController : MonoBehaviour
         
     }
 
-    public bool TryGetEmptyGrid(out Grid emptyGrid)
+    public bool TryGetEmptyGrid(out InventoryGrid emptyGrid)
     {
         foreach(var grid in inventoryGrids)
         {

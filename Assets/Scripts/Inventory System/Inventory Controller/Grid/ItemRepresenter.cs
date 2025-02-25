@@ -8,12 +8,14 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
     [SerializeField] private InventoryController inventoryController;
     private Image image; 
     public Item representedItem;
-    public Grid attachedGrid;
+    public InventoryGrid attachedGrid;
     Vector2 size = new Vector2(177, 132);
     Vector3 offset = Vector3.zero;
+    float storedFov;
 
-    public void InitRepresenter(Item item, Grid gridToAttach,InventoryController inventoryController)
+    public void InitRepresenter(Item item, InventoryGrid gridToAttach,InventoryController inventoryController,float fov)
     {
+        this.storedFov = fov;
         rectTransform = GetComponent<RectTransform>();
         image = GetComponent<Image>();
         this.inventoryController = inventoryController;
@@ -29,22 +31,32 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        Vector2 clickPoint = eventData.position;
-        Vector2 currentPoint = transform.position;
-        offset = currentPoint - clickPoint;
-        transform.SetParent(transform.parent.parent);
+        if (Input.GetMouseButtonDown(0))
+        {
+            Debug.Log("Clicked");
+            Vector2 clickPoint = eventData.position;
+            Vector2 currentPoint = transform.position;
+            offset = currentPoint - clickPoint;
+            transform.SetParent(transform.parent.parent);
+        }
 
+        if (Input.GetMouseButtonDown(1))
+            inventoryController.gridMenu.InitGridMenu(this);
+       
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        rectTransform.position = Input.mousePosition + offset;
+        if (Input.GetMouseButton(0))
+        {
+            rectTransform.position = Input.mousePosition + offset;
+        }
 
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if(inventoryController.TryGetGrid(this,out Grid grid) && grid.Representer == null)
+        if(inventoryController.TryGetGrid(this,out InventoryGrid grid) && grid.Representer == null)
         {
             attachedGrid.DetachRepresenter();
             transform.SetParent(grid.transform);

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class InspectorSceneController : MonoBehaviour
 {
     public Camera inspectorCam;
-    public Transform objectToBeInspected;
+    public Item objectToBeInspected;
     private Vector3 lastMousePosition;
     private RawImage rawImage;
     [SerializeField] private float rotationSpeed;
@@ -26,7 +26,7 @@ public class InspectorSceneController : MonoBehaviour
                 Input.GetMouseButtonDown(0))
             {
                 Debug.Log($"Hitted object: {hit.transform.name}");
-                if (hit.transform.TryGetComponent<IInspectable>(out IInspectable interactedPart))
+                if (hit.collider.transform.TryGetComponent<IInspectable>(out IInspectable interactedPart))
                 {
                     interactedPart.OnInspect(inspectionText);
                 }
@@ -47,8 +47,8 @@ public class InspectorSceneController : MonoBehaviour
         {
             Vector3 deltaMousePos = (Input.mousePosition - lastMousePosition);
 
-            objectToBeInspected.Rotate(Vector3.up, -1 * deltaMousePos.x * rotationSpeed * Time.deltaTime, Space.World);
-            objectToBeInspected.Rotate(Vector3.right, deltaMousePos.y * rotationSpeed * Time.deltaTime, Space.World);
+            objectToBeInspected.transform.Rotate(Vector3.up, -1 * deltaMousePos.x * rotationSpeed * Time.deltaTime, Space.World);
+            objectToBeInspected.transform.Rotate(Vector3.right, deltaMousePos.y * rotationSpeed * Time.deltaTime, Space.World);
 
             lastMousePosition = Input.mousePosition;
 
@@ -73,5 +73,21 @@ public class InspectorSceneController : MonoBehaviour
         ray = inspectorCam.ViewportPointToRay(viewportPoint);
       
         return isInBoundaries;
+    }
+
+    public void CleareInspectionText()
+    {
+        inspectionText.text = " ";
+    }
+
+    private void OnDisable()
+    {
+        if(objectToBeInspected != null)
+        {
+            inspectionText.text = " ";
+            objectToBeInspected.gameObject.SetActive(false);
+            objectToBeInspected = null;
+        }
+       
     }
 }

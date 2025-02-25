@@ -2,22 +2,22 @@ using UnityEngine;
 
 public class CheckArea : MonoBehaviour
 {
-    public ICollectible itemCollected;
+    public ICollectible itemToBeCollected;
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<ICollectible>(out ICollectible collectible))
-            itemCollected = collectible;
+            itemToBeCollected = collectible;
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.TryGetComponent<ICollectible>(out ICollectible collectible))
-            itemCollected = null;
+            itemToBeCollected = null;
     }
     private void Update()
     {
-        if (itemCollected != null && Input.GetKeyDown(KeyCode.E))
-            itemCollected.OnCollect();
+        if (itemToBeCollected != null && Input.GetKeyDown(KeyCode.E))
+            itemToBeCollected.OnCollect();
     }
 
 }

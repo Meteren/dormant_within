@@ -4,12 +4,15 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
 {
     [HideInInspector] public float distanceFromCam = 2;
 
-    [SerializeField] protected float scaleOffset;
+    [Header("Original Scale")]
+    public Vector3 originalScale;
+
+    public float scaleOffset;
     [SerializeField] protected Collider coll;
     [SerializeField] protected float rotationSpeed;
 
     [Header("Conditions")]
-    [SerializeField] private bool itemCollected;
+    [SerializeField] private bool onItemCollect;
 
     [Header("Texts")]
     [SerializeField] protected string onFoundToSay;
@@ -20,19 +23,34 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
 
     [Header("Inventory Controller")]
     [SerializeField] private InventoryController inventoryController;
+
+    [Header("Store Items To This Cam")]
+    [SerializeField] private Camera inspectorCam;
+
+    [HideInInspector] public Rigidbody rb;
+    [HideInInspector] public float cameraFOVLookingAtObject;
+    private Bounds bound;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        bound = coll.bounds;
+    }
     private void Update()
     {
-        if (itemCollected)
+        if (onItemCollect)
         {
             transform.Rotate(0, Time.deltaTime * rotationSpeed, 0);
             if (Input.GetKeyDown(KeyCode.Q))
             {
-               
+               //change later to make it ask player if he/she wants to take the item or not
                 if (inventoryController.TryAttachCollectedItemToGrid(this))
                 {
                     //indicate that item is collected via UIManager
                     UIManager.GetInstance.itemCollectedPanel.SetActive(false);
+                    gameObject.transform.SetParent(inspectorCam.transform);
                     gameObject.SetActive(false);
+                    onItemCollect = false;
                 }
                 else
                 {
@@ -55,17 +73,34 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         toSay.text = onInspectToSay;
     }
 
+    public void OnDrop()
+    {
+        PlayerController playerController = 
+            GameManager.instance.blackboard.TryGetValue("PlayerController", 
+            out PlayerController controller) ? controller : null;
+        transform.SetParent(null);
+        transform.position = new Vector3(playerController.transform.position.x + playerController.ForwardDirection.x,
+            playerController.transform.position.y, playerController.transform.position.z + playerController.ForwardDirection.z);
+        transform.localScale = originalScale;
+        transform.rotation = Quaternion.identity;
+        gameObject.SetActive(true);
+        rb.useGravity = true;
+    }
+
     private void ScaleToFitCamera()
     {
-        Bounds bound = coll.bounds;
-       
+
         Vector3 objectSizes = bound.max - bound.min;
+
+        Debug.Log($"Object Sizes Vector: {objectSizes} - Bound Max: {bound.max} - Bound Min: {bound.min}");
 
         float objectSize = Mathf.Max(objectSizes.x, objectSizes.y, objectSizes.z);
 
         float cameraView = Mathf.Tan(0.5f * Mathf.Deg2Rad * Camera.main.fieldOfView);
 
         float distance = (objectSize * 0.5f) / cameraView;
+
+        Debug.Log($"Object Distance: {distance} - Camera View: {cameraView} - Object Size: {objectSize}");
 
         float scaleFactor = distanceFromCam / distance;
 
@@ -74,13 +109,17 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
     }
     private void AttachObjectToCamera()
     {
+        rb.useGravity = false;
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;  
         transform.parent = Camera.main.transform;
+        cameraFOVLookingAtObject = Camera.main.fieldOfView;
         transform.localPosition = new Vector3(0, 0, distanceFromCam);
         transform.localRotation = Quaternion.identity;
+
     }
 
-    private void InitRotation() => itemCollected = true;
-
+    private void InitRotation() => onItemCollect = true;
 
     public void HandleItemCheckPanel()
     {

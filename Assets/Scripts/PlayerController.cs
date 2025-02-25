@@ -26,6 +26,11 @@ public class PlayerController : MonoBehaviour
     StateMachine playerStateMachine = new StateMachine();
     void Start()
     {
+        GameManager.instance.blackboard.SetValue("PlayerController", this);
+        PlayerController controller = GameManager.instance.blackboard.TryGetValue("PlayerController",
+            out PlayerController _controller) ? _controller : null;
+        if (controller == null)
+            Debug.Log("Controller null");
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
 
