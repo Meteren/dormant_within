@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 public abstract class Item : MonoBehaviour, ICollectible, IInspectable
@@ -30,6 +31,7 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public float cameraFOVLookingAtObject;
     private Bounds bound;
+    private HashSet<string> referenceToInventory;
 
     private void Start()
     {
@@ -44,25 +46,27 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
             if (Input.GetKeyDown(KeyCode.Q))
             {
                //change later to make it ask player if he/she wants to take the item or not
-                if (inventoryController.TryAttachCollectedItemToGrid(this))
-                {
-                    //indicate that item is collected via UIManager
-                    UIManager.GetInstance.itemCollectedPanel.SetActive(false);
-                    gameObject.transform.SetParent(inspectorCam.transform);
-                    gameObject.SetActive(false);
-                    onItemCollect = false;
-                }
-                else
-                {
+               referenceToInventory.Add(ToString());
+               if (inventoryController.TryAttachCollectedItemToGrid(this))
+               {
+                   //indicate that item is collected via UIManager
+                   UIManager.GetInstance.itemCollectedPanel.SetActive(false);
+                   gameObject.transform.SetParent(inspectorCam.transform);
+                   gameObject.SetActive(false);
+                   onItemCollect = false;
+               }
+               else
+               {
 
-                }
+               }
                     
             }
         }
             
     }
-    public void OnCollect()
+    public void OnCollect(HashSet<string> inventory)
     {
+        referenceToInventory = inventory;
         AttachObjectToCamera();
         ScaleToFitCamera();
         InitRotation();
@@ -85,6 +89,7 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         transform.rotation = Quaternion.identity;
         gameObject.SetActive(true);
         rb.useGravity = true;
+        referenceToInventory.Remove(ToString());
     }
 
     private void ScaleToFitCamera()
@@ -118,7 +123,6 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         transform.localRotation = Quaternion.identity;
 
     }
-
     private void InitRotation() => onItemCollect = true;
 
     public void HandleItemCheckPanel()
@@ -136,4 +140,5 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         return;
     }
 
+    public override string ToString() => GetType().Name;
 }

@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface ICollectible 
 {
-    void OnCollect();
+    void OnCollect(HashSet<string> inventory);
 }

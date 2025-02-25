@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -11,6 +12,10 @@ public class PlayerController : MonoBehaviour
     public Animator anim;
     public Rigidbody rb;
     private float turnSpeed = 100;
+
+    public HashSet<string> inventory = new HashSet<string>();
+
+    public PuzzleObject interactedPuzzleObject;
 
     [Header("Conditions")]
     public bool idle = true;

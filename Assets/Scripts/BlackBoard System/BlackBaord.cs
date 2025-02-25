@@ -18,7 +18,6 @@ public class BlackBoard
         BlackBoardKey key = GetKey(name); 
         if(key != null)
         {
-            Debug.Log("Key not null");
             if(blackBoardEntries.TryGetValue(key, out object entry) && entry is BlackBoardEntry<T> passedEntry)
             {
                 blackBoardEntries[key] = passedEntry;

@@ -70,4 +70,5 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
         rectTransform.localPosition = Vector3.zero;
     }
+
 }

@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GridMenu : MonoBehaviour
@@ -9,6 +8,9 @@ public class GridMenu : MonoBehaviour
     public ItemRepresenter representer;
     [Header("Inspector Scene Controller")]
     public InspectorSceneController inspectorSceneController;
+
+    public PlayerController controller => GameManager.instance.blackboard.TryGetValue("PlayerController", 
+        out PlayerController _controller) ? _controller : null;
 
     public void InitGridMenu(ItemRepresenter representer)
     {
@@ -24,7 +26,11 @@ public class GridMenu : MonoBehaviour
     }
     public void OnPressUseButton()
     {
-        Debug.Log("Item Used");
+        if (controller != null)
+            if (controller.interactedPuzzleObject != null)
+                controller.interactedPuzzleObject.ApplyPuzzleLogic(representer);
+            else
+                UIManager.instance.HandleIndicator("Can't use this item here.");
     }
 
     public void OnPressInspectButton()
@@ -54,5 +60,10 @@ public class GridMenu : MonoBehaviour
         Destroy(representer.gameObject);
         gameObject.SetActive(false);
 
+    }
+
+    private void OnDisable()
+    {
+        gameObject.SetActive(false);
     }
 }
