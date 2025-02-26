@@ -33,4 +33,10 @@ public class UIManager : Singleton<UIManager>
     {
         StartCoroutine(IndicatorCoroutine(text));
     }
+
+    public void HandleInventory(bool activate)
+    {
+        inventoryActive = activate;
+        inventory.SetActive(inventoryActive);
+    }
 }

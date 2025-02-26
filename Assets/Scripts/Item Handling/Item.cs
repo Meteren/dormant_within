@@ -5,9 +5,13 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
 {
     [HideInInspector] public float distanceFromCam = 2;
 
+    [Header("Item Name")]
+    [SerializeField] private string itemName;
+
     [Header("Original Scale")]
     public Vector3 originalScale;
 
+    [Header("Rotation Segment")]
     public float scaleOffset;
     [SerializeField] protected Collider coll;
     [SerializeField] protected float rotationSpeed;
@@ -135,10 +139,5 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
     {
         scaleOffset = Mathf.Clamp01(scaleOffset);
     }
-    public virtual void SpecialBehaviour()
-    {
-        return;
-    }
-
-    public override string ToString() => GetType().Name;
+    public override string ToString() => itemName;
 }

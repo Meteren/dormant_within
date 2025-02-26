@@ -1,17 +1,15 @@
-using Cinemachine;
-using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public abstract class PuzzleObject : MonoBehaviour
 {
     public HashSet<string> requiredItemNames = new HashSet<string>();
-    [SerializeField] protected List<Item> requiredItems = new List<Item>();
+    [SerializeField] protected List<KeyItem> requiredItems = new List<KeyItem>();
     protected HashSet<string> inventory => GameManager.instance.blackboard.TryGetValue("PlayerController", 
         out PlayerController controller) ? controller.inventory : null;
 
-    protected GameObject indicator => UIManager.instance.indicatorText;
+    public List<object> itemEntries = new List<object>();
+
     private void Start()
     {
         ExtractItems();
@@ -21,6 +19,12 @@ public abstract class PuzzleObject : MonoBehaviour
         foreach (var item in requiredItems)
             requiredItemNames.Add(item.ToString());
 
+    }
+    protected void AddItem(ItemRepresenter representer)
+    {
+        KeyItem item = representer.representedItem as KeyItem;
+        ItemEntry<KeyItem> newEntry = new ItemEntry<KeyItem>(item);
+        itemEntries.Add(newEntry);
     }
 
     protected bool ContainsItem(string name)
@@ -42,37 +46,4 @@ public abstract class PuzzleObject : MonoBehaviour
         Debug.Log("Don't have any sequence.");
     }
 
-}
-
-
-public class RequireItemAndSequencePuzzleObject : PuzzleObject
-{
-    [SerializeField] private PuzzleSequence puzzleSequence;
-    public override void ApplyPuzzleLogic(ItemRepresenter representer)
-    {
-        puzzleSequence.Init();
-    }
-}
-
-
-public class RequireSequencePuzzleObject : PuzzleObject
-{
-    public override void ApplyPuzzleLogic(ItemRepresenter item)
-    {
-
-    }
-}
-
-public class PuzzleSequence : MonoBehaviour, IInteractable
-{
-    //jump to this cam to show player the sequence on OnInteract() or init this sequence on Init()
-    [SerializeField] private CinemachineVirtualCamera sequenceCam;
-    public void Init()
-    {
-        
-    }
-    public void OnInteract()
-    {
-        return;
-    }
 }

@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cube : Item
+public class Cube : KeyItem
 {
-    private void OnMouseDown()
+    public override void ApplyBehaviour()
     {
-        Debug.Log("Clicked");
+        //belongedPuzzleObject
     }
+
 }

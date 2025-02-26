@@ -12,7 +12,7 @@ public class LockedObject : PuzzleObject, IInteractable
             UIManager.instance.HandleIndicator("Can't use this item here");
             return;
         }
-        UIManager.instance.inventory.SetActive(false);
+        UIManager.instance.HandleInventory(false);
         UIManager.instance.HandleIndicator("Object unlocked the door.");
         DeleteRepresenter(representer);
         isItUnlocked = true;
