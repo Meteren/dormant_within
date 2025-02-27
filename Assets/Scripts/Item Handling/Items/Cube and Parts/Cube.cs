@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Cube : KeyItem
 {
-    public override void ApplyBehaviour()
+    public TextMeshProUGUI itemNumber;
+
+    private new void Start()
     {
-        //belongedPuzzleObject
+        base.Start();
+        itemNumber = GetComponentInChildren<TextMeshProUGUI>();
     }
 
 }

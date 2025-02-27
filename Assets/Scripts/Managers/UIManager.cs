@@ -21,17 +21,17 @@ public class UIManager : Singleton<UIManager>
         }
           
     }
-    private IEnumerator IndicatorCoroutine(string text)
+    private IEnumerator IndicatorCoroutine(string text,float time)
     {
         indicatorText.SetActive(true);
         indicatorText.GetComponent<TextMeshProUGUI>().text = text;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(time);
         indicatorText.SetActive(false);
     }
 
-    public void HandleIndicator(string text)
+    public void HandleIndicator(string text,float time)
     {
-        StartCoroutine(IndicatorCoroutine(text));
+        StartCoroutine(IndicatorCoroutine(text,time));
     }
 
     public void HandleInventory(bool activate)

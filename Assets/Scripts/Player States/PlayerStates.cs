@@ -126,3 +126,4 @@ public class RunState : BasePLayerState
               playerController.rb.velocity.y, playerController.ForwardDirection.z * runSpeed);
     }
 }
+

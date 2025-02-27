@@ -9,11 +9,11 @@ public class LockedObject : PuzzleObject, IInteractable
     {
         if (!ContainsItem(representer.representedItem.ToString()))
         {
-            UIManager.instance.HandleIndicator("Can't use this item here");
+            UIManager.instance.HandleIndicator("Can't use this item here",2f);
             return;
         }
         UIManager.instance.HandleInventory(false);
-        UIManager.instance.HandleIndicator("Object unlocked the door.");
+        UIManager.instance.HandleIndicator("Object unlocked the door.", 2f);
         DeleteRepresenter(representer);
         isItUnlocked = true;
     }
@@ -21,7 +21,7 @@ public class LockedObject : PuzzleObject, IInteractable
     public void OnInteract()
     {
         if (!isItUnlocked)
-            UIManager.instance.HandleIndicator(onInteractText);
+            UIManager.instance.HandleIndicator(onInteractText,2f);
         else
         {
             Debug.Log("Door opened and passed to the new area.");

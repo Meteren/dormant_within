@@ -37,7 +37,7 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
     private Bounds bound;
     private HashSet<string> referenceToInventory;
 
-    private void Start()
+    protected void Start()
     {
         rb = GetComponent<Rigidbody>();
         bound = coll.bounds;
@@ -140,4 +140,13 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         scaleOffset = Mathf.Clamp01(scaleOffset);
     }
     public override string ToString() => itemName;
+
+    public void ResetState()
+    {
+        transform.SetParent(null);
+        transform.localScale = originalScale;
+        transform.rotation = Quaternion.identity;
+        if(!gameObject.activeSelf)
+            gameObject.SetActive(true);
+    }
 }

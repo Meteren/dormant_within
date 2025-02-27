@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
         var idleState = new IdleState(this);
         var walkState = new WalkState(this);
         var runState = new RunState(this);
-        var walkBackwardsState = new WalkBackwardsState(this);   
+        var walkBackwardsState = new WalkBackwardsState(this);
 
         Add(idleState, walkState, new FuncPredicate(() => walk));
         Add(idleState, runState, new FuncPredicate(() => run));
@@ -52,7 +52,6 @@ public class PlayerController : MonoBehaviour
         Add(runState, walkState, new FuncPredicate(() => walk));
         Add(runState, idleState, new FuncPredicate(() => idle));
         Add(walkBackwardsState, idleState, new FuncPredicate(() => idle));
- 
 
         playerStateMachine.CurrentState = idleState;
         

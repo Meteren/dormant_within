@@ -8,7 +8,7 @@ public class RequireItemAndSequencePuzzleObject : PuzzleObject
         if (!ContainsItem(representer.representedItem.ToString()))
         {
             Debug.Log(representer.representedItem.ToString());
-            UIManager.instance.HandleIndicator("Can't use this item here.");
+            UIManager.instance.HandleIndicator("Can't use this item here.", 2f);
             return; 
         }
         AddItem(representer);

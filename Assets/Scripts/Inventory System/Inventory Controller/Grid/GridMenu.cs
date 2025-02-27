@@ -30,7 +30,7 @@ public class GridMenu : MonoBehaviour
             if (controller.interactedPuzzleObject != null)
                 controller.interactedPuzzleObject.ApplyPuzzleLogic(representer);
             else
-                UIManager.instance.HandleIndicator("Can't use this item here.");
+                UIManager.instance.HandleIndicator("Can't use this item here.",2f);
     }
 
     public void OnPressInspectButton()

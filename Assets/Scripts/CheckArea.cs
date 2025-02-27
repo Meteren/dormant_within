@@ -30,6 +30,6 @@ public class CheckArea : MonoBehaviour
             itemToBeCollected.OnCollect(GetComponentInParent<PlayerController>().inventory);
         if (interactedObject != null && Input.GetKeyDown(KeyCode.E))
             interactedObject.OnInteract();
-    }
 
+    }
 }

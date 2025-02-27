@@ -7,7 +7,7 @@ public abstract class ItemPart : MonoBehaviour, IInspectable
 {
     [SerializeField] protected string toSayOnInspect;
 
-    public void OnInspect(TextMeshProUGUI toSay)
+    public virtual void OnInspect(TextMeshProUGUI toSay)
     {
         toSay.text = toSayOnInspect;
     }
