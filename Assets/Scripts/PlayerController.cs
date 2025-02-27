@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
 
     public PuzzleObject interactedPuzzleObject;
 
+    IState baseState;
+
     [Header("Conditions")]
     public bool idle = true;
     public bool walk;
@@ -43,6 +45,8 @@ public class PlayerController : MonoBehaviour
         var walkState = new WalkState(this);
         var runState = new RunState(this);
         var walkBackwardsState = new WalkBackwardsState(this);
+
+        baseState = idleState;
 
         Add(idleState, walkState, new FuncPredicate(() => walk));
         Add(idleState, runState, new FuncPredicate(() => run));
@@ -123,6 +127,18 @@ public class PlayerController : MonoBehaviour
         }
         transform.rotation = Quaternion.Euler(rotation);
 
+    }
+
+    private void ResetState()
+    {
+        idle = true;
+        walkBackwards = aim = run = walk = false;
+        playerStateMachine.CurrentState = baseState;
+    }
+
+    private void OnDisable()
+    {
+        ResetState();
     }
 
 

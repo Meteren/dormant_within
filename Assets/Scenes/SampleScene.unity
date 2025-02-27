@@ -1119,17 +1119,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sequenceCam: {fileID: 1916211480}
-  sequenceCameraLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  originalCameraLayer:
-    serializedVersion: 2
-    m_Bits: 0
+  playerOffsetFromCam: 2
   cubeOne: {fileID: 0}
   cubeTwo: {fileID: 0}
   cubeThree: {fileID: 0}
   cubeFour: {fileID: 0}
-  placements: []
+  placements:
+  - {fileID: 1533234466}
+  - {fileID: 1532997480}
+  - {fileID: 2005486652}
+  - {fileID: 1619889157}
   onNotActivatedToSay: There is something over here..
 --- !u!114 &174835658
 MonoBehaviour:
@@ -1506,7 +1505,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0000031739473, y: 0}
+  m_AnchoredPosition: {x: -0.326, y: 0.295}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &319874999
@@ -1556,8 +1555,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.4
-  m_fontSizeBase: 0.4
+  m_fontSize: 0.2
+  m_fontSizeBase: 0.2
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1944,7 +1943,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 160
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 8400000, guid: c3e3f7a51dee37b41a55395b0a42ac34, type: 2}
   m_TargetDisplay: 0
@@ -3358,7 +3357,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0000031739473, y: 0}
+  m_AnchoredPosition: {x: -0.316, y: 0.333}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &756528214
@@ -3408,8 +3407,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.4
-  m_fontSizeBase: 0.4
+  m_fontSize: 0.2
+  m_fontSizeBase: 0.2
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3976,7 +3975,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 856143499}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.00129}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5288,8 +5287,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 8.809605, y: 4.153889, z: 27.808475}
-  m_Center: {x: 0.2073927, y: 1.0357058, z: 3.920723}
+  m_Size: {x: 8.809605, y: 4.153889, z: 27.265053}
+  m_Center: {x: 0.2073927, y: 1.0357058, z: 4.1924343}
 --- !u!114 &1245608358
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6419,8 +6418,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 15.220608, y: 4.163162, z: 9.538858}
-  m_Center: {x: 6.529682, y: 0.9283414, z: -1.1663294}
+  m_Size: {x: 15.410227, y: 4.163162, z: 10.348212}
+  m_Center: {x: 6.4348726, y: 0.9283414, z: -0.76165247}
 --- !u!114 &1551703710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7719,7 +7718,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0000031739473, y: 0}
+  m_AnchoredPosition: {x: -0.344, y: 0.339}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1720375461
@@ -7769,8 +7768,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.4
-  m_fontSizeBase: 0.4
+  m_fontSize: 0.2
+  m_fontSizeBase: 0.2
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -7955,6 +7954,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1720447113}
   m_CullTransparentMesh: 1
+--- !u!65 &1754538666 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 8190462882859805233, guid: f5a6598dce1c35a478a3debf3a4b7b73, type: 3}
+  m_PrefabInstance: {fileID: 1974767749}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1794683232
 GameObject:
   m_ObjectHideFlags: 0
@@ -9410,6 +9414,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1544950702}
     - target: {fileID: 736832707688254817, guid: f5a6598dce1c35a478a3debf3a4b7b73, type: 3}
+      propertyPath: coll
+      value: 
+      objectReference: {fileID: 1754538666}
+    - target: {fileID: 736832707688254817, guid: f5a6598dce1c35a478a3debf3a4b7b73, type: 3}
+      propertyPath: itemNumber
+      value: 
+      objectReference: {fileID: 1941543117}
+    - target: {fileID: 736832707688254817, guid: f5a6598dce1c35a478a3debf3a4b7b73, type: 3}
       propertyPath: inspectorCam
       value: 
       objectReference: {fileID: 403624233}
@@ -9419,7 +9431,7 @@ PrefabInstance:
       objectReference: {fileID: 2024664714}
     - target: {fileID: 1402760204587052776, guid: f5a6598dce1c35a478a3debf3a4b7b73, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.065
+      value: -0.128
       objectReference: {fileID: 0}
     - target: {fileID: 1402760204587052776, guid: f5a6598dce1c35a478a3debf3a4b7b73, type: 3}
       propertyPath: m_LocalPosition.y
@@ -9427,7 +9439,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1402760204587052776, guid: f5a6598dce1c35a478a3debf3a4b7b73, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.362
+      value: -0.356
       objectReference: {fileID: 0}
     - target: {fileID: 1402760204587052776, guid: f5a6598dce1c35a478a3debf3a4b7b73, type: 3}
       propertyPath: m_LocalRotation.w
@@ -10097,7 +10109,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0000031739473, y: 0}
+  m_AnchoredPosition: {x: -0.351, y: 0.328}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2070414180
@@ -10147,8 +10159,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.4
-  m_fontSizeBase: 0.4
+  m_fontSize: 0.2
+  m_fontSizeBase: 0.2
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
