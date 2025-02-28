@@ -1,30 +1,48 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 public class MatchCubesToPlaceSequence : PuzzleSequence
 {
+    [SerializeField] private EventListener listener;
 
     int entryIndex = 0;
-
+    [Header("Needed Items")]
     [SerializeField] private Cube cubeOne;
     [SerializeField] private Cube cubeTwo;
     [SerializeField] private Cube cubeThree;
     [SerializeField] private Cube cubeFour;
 
     [Header("Placemenets")]
-    [SerializeField] private List<Transform> placements;
+    [SerializeField] private List<Grid> placements;
 
     [Header("Text")]
     [SerializeField] private string onNotActivatedToSay;
 
     private List<Cube> assignedItems = new List<Cube>();
 
+    private GridManager gridManager;
+
+    private void Start()
+    {     
+        gridManager = GetComponent<GridManager>();
+        listener.AddEvent(SequenceLogic);
+    }
     private void Update()
     {
         if (onInpsect && Input.GetKeyDown(KeyCode.Q))
         {
             SequenceCamHandler(0);
             onInpsect = false;
+            if (gridManager != null)
+                gridManager.ResetGrid();
+        }
+
+        if (sequenceResolved)
+        {
+           OnSequenceResolved();
         }
             
     }
@@ -38,8 +56,7 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
         }   
         if (itemToBePlaced != null)
         {
-            StartCoroutine(PlaceItem(placements[entryIndex].transform.position, itemToBePlaced));
-            Debug.Log("Initted");
+            StartCoroutine(PlaceItem(placements[entryIndex], itemToBePlaced));
         }
             
         if (CanBeInit())
@@ -48,24 +65,43 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
             SequenceCamHandler(2);
             onInpsect = true;
             sequenceCanBeActivated = true;
+            gridManager.Init(placements,(int)Mathf.Sqrt(placements.Count), (int)Mathf.Sqrt(placements.Count));
             //init the puzzle sequence write the logic of this puzzle
         }
     }
     public override void SequenceLogic()
     {
-        base.SequenceLogic();
+        foreach(var grid in placements)
+        {
+            int itemNumber = Convert.ToInt32(grid.GetItem().GetComponentInChildren<TextMeshProUGUI>().text);
+            int gridNumber = Convert.ToInt32(grid.GetComponentInChildren<TextMeshProUGUI>().text);
+            if (itemNumber != gridNumber)
+                return;
+        }
+        sequenceResolved = true;
+    }
+
+    public override void OnSequenceResolved()
+    {
+        SequenceCamHandler(0);
+        Destroy(transform.parent.gameObject);
+        Debug.Log("Puzzle Solved");
     }
 
     public override void OnInteract()
     {
-        if (!sequenceCanBeActivated)
+        if (!sequenceResolved)
         {
-            onInpsect = true;
-            SequenceCamHandler(2);
-            UIManager.instance.HandleIndicator(onNotActivatedToSay,2f);
-        }   
-        else
-            TryInit(itemEntries,requiredItems);
+            if (!sequenceCanBeActivated)
+            {
+                onInpsect = true;
+                SequenceCamHandler(2);
+                UIManager.instance.HandleIndicator(onNotActivatedToSay, 2f);
+            }
+            else
+                TryInit(itemEntries, requiredItems);
+        }
+       
     }
 
     public override KeyItem AssignItemsReturnIfNeeded()
@@ -99,16 +135,16 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
         {
             reference = null;
         }
+
+        placements[entryIndex].AssignItem(reference);
          
         return reference;
 
     }
-
-    public IEnumerator PlaceItem(Vector3 position, KeyItem itemToBePlaced)
-    {
-        
+    public IEnumerator PlaceItem(Grid grid, KeyItem itemToBePlaced)
+    {     
         SequenceCamHandler(2);
-        itemToBePlaced.transform.position = position;
+        itemToBePlaced.transform.position = grid.transform.position;
         itemToBePlaced.ResetState();
         float y = sequenceCam.transform.eulerAngles.y;
         HandlePuzzleItemPhysics(itemToBePlaced);
@@ -118,6 +154,13 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
         yield return new WaitForSecondsRealtime(1.5f);
         if(!sequenceCanBeActivated)
             SequenceCamHandler(0);
+        itemToBePlaced.transform.SetParent(grid.transform);
     }
+
+    private void OnDisable()
+    {
+        playerController.interactedPuzzleObject = null;
+    }
+
 
 }

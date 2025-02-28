@@ -6,7 +6,7 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
     [HideInInspector] public float distanceFromCam = 2;
 
     [Header("Item Name")]
-    [SerializeField] private string itemName;
+    [SerializeField] protected string itemName;
 
     [Header("Original Scale")]
     public Vector3 originalScale;
