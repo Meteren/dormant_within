@@ -1,6 +1,7 @@
 
+using System.Collections;
 using UnityEngine;
-public class IdleState : BasePLayerState
+public class IdleState : BasePlayerState
 {
 
     public IdleState(PlayerController playerController) : base(playerController)
@@ -35,7 +36,7 @@ public class IdleState : BasePLayerState
     }
 }
 
-public class WalkState : BasePLayerState
+public class WalkState : BasePlayerState
 {
 
     float walkSpeed = 3f;
@@ -70,7 +71,7 @@ public class WalkState : BasePLayerState
     }
 }
 
-public class WalkBackwardsState : BasePLayerState
+public class WalkBackwardsState : BasePlayerState
 {
     float backwardsSpeed = 1.5f;
     public WalkBackwardsState(PlayerController playerController) : base(playerController)
@@ -97,7 +98,7 @@ public class WalkBackwardsState : BasePLayerState
     }
 }
 
-public class RunState : BasePLayerState
+public class RunState : BasePlayerState
 {
     float runSpeed = 6f;
     public RunState(PlayerController playerController) : base(playerController)
@@ -124,6 +125,74 @@ public class RunState : BasePLayerState
             playerController.walk = true;
         playerController.rb.velocity = new Vector3(playerController.ForwardDirection.x * runSpeed,
               playerController.rb.velocity.y, playerController.ForwardDirection.z * runSpeed);
+    }
+}
+
+public class AimState : BasePlayerState
+{
+    float transitionDuration = 0.2f;
+    public AimState(PlayerController playerController) : base(playerController)
+    {
+    }
+
+    public override void OnStart()
+    {
+        base.OnStart();
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+        playerController.aim = false;
+    }
+
+    public override void Update()
+    {
+        Debug.Log("Aim state");
+        if (Input.GetMouseButtonDown(0))
+        {
+            playerController.shoot = true;
+        }
+
+        if (Input.GetMouseButtonUp(1) || !playerController.isPressingM2)
+            GameManager.instance.StartCoroutine(WaitTransition());
+    }
+
+    private IEnumerator WaitTransition()
+    {
+        yield return new WaitForSeconds(transitionDuration);
+        playerController.idle = true;
+    }
+}
+
+public class ShootState : BasePlayerState
+{
+    AnimatorStateInfo stateInfo;
+    public ShootState(PlayerController playerController) : base(playerController)
+    {
+    }
+ 
+    public override void OnStart()
+    {
+        base.OnStart();
+       
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+        playerController.shoot = false;
+    }
+
+    public override void Update()
+    {
+        Debug.Log("Shoot State");
+        base.Update();
+        stateInfo = playerController.anim.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.IsName("shooting"))
+            if (stateInfo.normalizedTime >= 1)
+                playerController.aim = true;
+
     }
 }
 

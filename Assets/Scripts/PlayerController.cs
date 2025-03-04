@@ -25,7 +25,9 @@ public class PlayerController : MonoBehaviour
     public bool run;
     public bool aim;
     public bool walkBackwards;
-    
+    public bool shoot;
+    public bool isPressingM2;
+
     [Header("Reference Point")]
     [SerializeField] private Transform reference;
     public Vector3 ForwardDirection {  get; private set; }
@@ -34,10 +36,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         GameManager.instance.blackboard.SetValue("PlayerController", this);
-        PlayerController controller = GameManager.instance.blackboard.TryGetValue("PlayerController",
-            out PlayerController _controller) ? _controller : null;
-        if (controller == null)
-            Debug.Log("Controller null");
+
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
 
@@ -45,6 +44,8 @@ public class PlayerController : MonoBehaviour
         var walkState = new WalkState(this);
         var runState = new RunState(this);
         var walkBackwardsState = new WalkBackwardsState(this);
+        var aimState = new AimState(this);
+        var shootState = new ShootState(this);
 
         baseState = idleState;
 
@@ -56,6 +57,10 @@ public class PlayerController : MonoBehaviour
         Add(runState, walkState, new FuncPredicate(() => walk));
         Add(runState, idleState, new FuncPredicate(() => idle));
         Add(walkBackwardsState, idleState, new FuncPredicate(() => idle));
+        Any(aimState, new FuncPredicate(() => aim));
+        Add(aimState, shootState, new FuncPredicate(() => shoot));
+        Add(aimState, idleState, new FuncPredicate(() => idle));
+        Add(shootState, aimState, new FuncPredicate(() => aim));
 
         playerStateMachine.CurrentState = idleState;
         
@@ -63,7 +68,12 @@ public class PlayerController : MonoBehaviour
     
     private void Add(IState from, IState to, IPredicate condition)
     {
-        playerStateMachine.AddNode(from, to, condition);
+        playerStateMachine.Add(from, to, condition);
+    }
+
+    private void Any(IState to, IPredicate condition)
+    {
+        playerStateMachine.Any(to, condition);
     }
 
     private void FixedUpdate()
@@ -74,6 +84,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetMouseButtonUp(1))
+            isPressingM2 = false;
         SetRotationDirection();
         UpdateAnimations();
         playerStateMachine.Update();
@@ -96,6 +108,7 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("walkBackwards", walkBackwards);
         anim.SetBool("run", run);
         anim.SetBool("aim", aim);
+        anim.SetBool("shoot", shoot);
     }
 
     public void SetForwardDirection()

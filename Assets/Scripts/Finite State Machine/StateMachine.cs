@@ -7,8 +7,15 @@ public class StateMachine
     private IState currentState;
     public IState CurrentState { get { return currentState; } set { currentState = value; } }
 
+    private List<Transition> anyTransitions = new();
+
     public void Update()
     {
+        if(TryGetAnyTransition(out Transition anyTransition) && anyTransition.to != currentState)
+        {
+            ChangeStateTo(anyTransition.to);
+        }
+
         if(TryGetTransition(out Transition transition))
         {
             ChangeStateTo(transition.to);
@@ -42,11 +49,32 @@ public class StateMachine
         transition = default;
         return false;
     }
+
+    private bool TryGetAnyTransition(out Transition transition)
+    {
+        foreach(var transit in anyTransitions)
+        {
+            if (transit.condition.Evaluate())
+            {
+                transition = transit;
+                return true;
+            }
+        }
+        transition = default;
+        return false;   
+    }
     
-    public void AddNode(IState from, IState to, IPredicate condition)
+    public void Add(IState from, IState to, IPredicate condition)
     {
         AddOrGetStateNode(from).AddTransition(AddOrGetStateNode(to).nodeState, condition);
     }
+
+    public void Any(IState to, IPredicate condition)
+    {
+        StateNode stateNode = AddOrGetStateNode(to);
+        anyTransitions.Add(new Transition(condition,stateNode.nodeState));
+    }
+
 
     private StateNode AddOrGetStateNode(IState state)
     {

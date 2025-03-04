@@ -1,11 +1,12 @@
 ﻿
 using UnityEngine;
 
-public class BasePLayerState : IState
+public class BasePlayerState : IState
 {
     protected PlayerController playerController;
+
   
-    public BasePLayerState(PlayerController playerController)
+    public BasePlayerState(PlayerController playerController)
     {
         this.playerController = playerController;
     }
@@ -21,8 +22,11 @@ public class BasePLayerState : IState
 
     public virtual void Update()
     {
-        return;
+        if (Input.GetMouseButtonDown(1))
+        {
+            playerController.aim = true;
+            playerController.isPressingM2 = true;
+        }
     }
-
    
 }

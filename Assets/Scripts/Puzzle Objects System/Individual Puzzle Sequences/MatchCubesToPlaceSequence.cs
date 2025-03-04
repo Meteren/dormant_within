@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
+
 public class MatchCubesToPlaceSequence : PuzzleSequence
 {
     [SerializeField] private EventListener listener;
@@ -154,7 +154,7 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
         yield return new WaitForSecondsRealtime(1.5f);
         if(!sequenceCanBeActivated)
             SequenceCamHandler(0);
-        itemToBePlaced.transform.SetParent(grid.transform);
+        itemToBePlaced.transform.SetParent(transform);
     }
 
     private void OnDisable()

@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,9 +25,12 @@ public class GridManager : MonoBehaviour
     [SerializeField] private EventController eventController;
     [SerializeField] private EventListener listener;
 
-    private void Start()
+    private void Awake()
     {
         listener.AddEvent(HandlePositionAndState);
+    }
+    private void Start()
+    {
         sequence = GetComponent<PuzzleSequence>();
     }
 
@@ -143,8 +145,7 @@ public class GridManager : MonoBehaviour
             SelectedGrid.GetItem().ResetOutlineColor();
             SelectedGrid.GetItem().DisableOutline();
             SelectedGrid = null;
-        }
-       
+        }       
        
     }
 }

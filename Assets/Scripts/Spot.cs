@@ -17,13 +17,7 @@ public class Spot : MonoBehaviour
         cam = GetComponentInChildren<CinemachineVirtualCamera>();
     }
 
-    private void FixedUpdate()
-    {
-        Vector3 deltaPos = lookAt.transform.position - capturedPosition;
-        if (shouldLookAt && !isLookingAt)
-            CheckAndRotateIfNeeded(deltaPos);//no need it seems
-        capturedPosition = lookAt.transform.position;
-    }
+  
     private void Update()
     {
        
