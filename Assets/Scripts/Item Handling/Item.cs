@@ -40,7 +40,7 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
     protected void Start()
     {
         rb = GetComponent<Rigidbody>();
-        bound = coll.bounds;
+        bound = GetBounds();
     }
     private void Update()
     {
@@ -68,6 +68,22 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         }
             
     }
+
+    private Bounds GetBounds()
+    {
+        Renderer[] childrenRenderers = GetComponentsInChildren<Renderer>();
+
+        Bounds bounds = childrenRenderers[0].bounds;
+
+        foreach(var renderer in childrenRenderers)
+        {
+            Bounds childBound = renderer.bounds;
+            bound.Encapsulate(childBound);
+        }
+
+        return bounds;
+
+    }
     public void OnCollect(HashSet<string> inventory)
     {
         referenceToInventory = inventory;
@@ -87,6 +103,8 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
             GameManager.instance.blackboard.TryGetValue("PlayerController", 
             out PlayerController controller) ? controller : null;
         transform.SetParent(null);
+        SetCollidersActive(true);
+        SetRigidBodyKinematic(false);
         transform.position = new Vector3(playerController.transform.position.x + playerController.ForwardDirection.x,
             playerController.transform.position.y, playerController.transform.position.z + playerController.ForwardDirection.z);
         transform.localScale = originalScale;
@@ -94,6 +112,9 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         gameObject.SetActive(true);
         rb.useGravity = true;
         referenceToInventory.Remove(ToString());
+        if (playerController.equippedItem != null)
+            if (playerController.equippedItem == this as IEquippable)
+                playerController.equippedItem = null;
     }
 
     private void ScaleToFitCamera()
@@ -131,7 +152,6 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
 
     public void HandleItemCheckPanel()
     {
-
         UIManager.GetInstance.itemCollectedPanel.GetComponentInChildren<TextMeshProUGUI>().text = onFoundToSay;
         UIManager.GetInstance.itemCollectedPanel.SetActive(true);
     }
@@ -149,4 +169,22 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         if(!gameObject.activeSelf)
             gameObject.SetActive(true);
     }
+
+    public void SetCollidersActive(bool set)
+    {
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+
+        foreach (var collider in colliders)
+            collider.enabled = set;
+    }
+
+    public void SetRigidBodyKinematic(bool set)
+    {
+        if(set)
+            rb.isKinematic = true;
+        else
+            rb.isKinematic = false;
+    }
+    
+
 }

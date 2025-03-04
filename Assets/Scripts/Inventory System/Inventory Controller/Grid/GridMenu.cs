@@ -9,7 +9,7 @@ public class GridMenu : MonoBehaviour
     [Header("Inspector Scene Controller")]
     public InspectorSceneController inspectorSceneController;
 
-    public PlayerController controller => GameManager.instance.blackboard.TryGetValue("PlayerController", 
+    public PlayerController playerController => GameManager.instance.blackboard.TryGetValue("PlayerController", 
         out PlayerController _controller) ? _controller : null;
 
     public void InitGridMenu(ItemRepresenter representer)
@@ -23,12 +23,27 @@ public class GridMenu : MonoBehaviour
     public void OnPressEquipButton()
     {
         Debug.Log("Item Equipped");
+        inspectorSceneController.ClearInspectionText();
+        Item item = representer.representedItem;
+        if(item.TryGetComponent<IEquippable>(out IEquippable equippableItem))
+        {
+            if (item as IEquippable != playerController.equippedItem)
+            {
+                equippableItem.Equip(playerController);
+                gameObject.SetActive(false);
+            }
+            else
+                UIManager.instance.HandleIndicator("Already equipped.", 2f);
+        }
+        else
+            UIManager.instance.HandleIndicator("Can't equip this item", 2f);
+
     }
     public void OnPressUseButton()
     {
-        if (controller != null)
-            if (controller.interactedPuzzleObject != null)
-                controller.interactedPuzzleObject.ApplyPuzzleLogic(representer);
+        if (playerController != null)
+            if (playerController.interactedPuzzleObject != null)
+                playerController.interactedPuzzleObject.ApplyPuzzleLogic(representer);
             else
                 UIManager.instance.HandleIndicator("Can't use this item here.",2f);
     }
@@ -37,23 +52,30 @@ public class GridMenu : MonoBehaviour
     {
         Item gameObjectToBeInspected = inspectorSceneController.objectToBeInspected;
         if (gameObjectToBeInspected != null)
-            if(gameObjectToBeInspected.gameObject.activeSelf)
+        {
+            if (gameObjectToBeInspected.gameObject.activeSelf)
                 gameObjectToBeInspected.gameObject.SetActive(false);
+            if (gameObjectToBeInspected.TryGetComponent<IEquippable>(out IEquippable equippableItem))
+                equippableItem.Equip(playerController);
+        }
+              
         Item item = representer.representedItem;
         Debug.Log("Inspect button pressed");
         item.transform.SetParent(inspectorSceneController.inspectorCam.transform);
         item.transform.localPosition = new Vector3(0, 0, item.distanceFromCam);
         item.transform.localRotation = Quaternion.identity;
-        item.rb.velocity = Vector3.zero;
+        item.transform.localScale = representer.itemInspectorCamScale;
+        //item.rb.velocity = Vector3.zero;
+        item.SetCollidersActive(true);
         inspectorSceneController.objectToBeInspected = item;
-        inspectorSceneController.CleareInspectionText();
+        inspectorSceneController.ClearInspectionText();
         item.gameObject.SetActive(true);
         inspectorSceneController.inspectorCam.fieldOfView = item.cameraFOVLookingAtObject;
         gameObject.SetActive(false);
     }
     public void OnPressDropButton()
     {
-        inspectorSceneController.CleareInspectionText();
+        inspectorSceneController.ClearInspectionText();
         inspectorSceneController.objectToBeInspected = null;
         representer.representedItem.OnDrop();
         representer.attachedGrid.DetachRepresenter();

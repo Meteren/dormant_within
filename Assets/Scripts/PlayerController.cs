@@ -30,6 +30,9 @@ public class PlayerController : MonoBehaviour
 
     [Header("Reference Point")]
     [SerializeField] private Transform reference;
+
+    [Header("Equipped Item")]
+    public IEquippable equippedItem;
     public Vector3 ForwardDirection {  get; private set; }
 
     StateMachine playerStateMachine = new StateMachine();
@@ -57,7 +60,9 @@ public class PlayerController : MonoBehaviour
         Add(runState, walkState, new FuncPredicate(() => walk));
         Add(runState, idleState, new FuncPredicate(() => idle));
         Add(walkBackwardsState, idleState, new FuncPredicate(() => idle));
+
         Any(aimState, new FuncPredicate(() => aim));
+
         Add(aimState, shootState, new FuncPredicate(() => shoot));
         Add(aimState, idleState, new FuncPredicate(() => idle));
         Add(shootState, aimState, new FuncPredicate(() => aim));

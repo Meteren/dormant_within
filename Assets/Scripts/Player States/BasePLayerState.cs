@@ -22,7 +22,7 @@ public class BasePlayerState : IState
 
     public virtual void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) && playerController.equippedItem != null && !UIManager.instance.inventory.activeSelf)
         {
             playerController.aim = true;
             playerController.isPressingM2 = true;

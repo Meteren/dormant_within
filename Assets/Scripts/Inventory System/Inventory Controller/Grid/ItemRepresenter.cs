@@ -12,6 +12,7 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
     Vector2 size = new Vector2(177, 132);
     Vector3 offset = Vector3.zero;
     float storedFov;
+    public Vector3 itemInspectorCamScale;
 
     public void InitRepresenter(Item item, InventoryGrid gridToAttach,InventoryController inventoryController,float fov)
     {
@@ -21,6 +22,7 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
         this.inventoryController = inventoryController;
         rectTransform.sizeDelta = size;
         image.sprite = item.itemImage;
+        itemInspectorCamScale = item.transform.localScale;
         representedItem = item;
         attachedGrid = gridToAttach;
         attachedGrid.AttachRepresenter(this);

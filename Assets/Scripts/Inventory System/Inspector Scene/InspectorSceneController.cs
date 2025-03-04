@@ -12,6 +12,8 @@ public class InspectorSceneController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI inspectionText;
     [Header("Conditions")]
     [SerializeField] private bool isPressed;
+    PlayerController playerController => GameManager.instance.blackboard.TryGetValue("PlayerController",
+        out PlayerController _controller) ? _controller : null;
 
     private void Start()
     {
@@ -75,7 +77,7 @@ public class InspectorSceneController : MonoBehaviour
         return isInBoundaries;
     }
 
-    public void CleareInspectionText()
+    public void ClearInspectionText()
     {
         inspectionText.text = " ";
     }
@@ -85,7 +87,14 @@ public class InspectorSceneController : MonoBehaviour
         if(objectToBeInspected != null)
         {
             inspectionText.text = " ";
-            objectToBeInspected.gameObject.SetActive(false);
+            if(objectToBeInspected.TryGetComponent<IEquippable>(out IEquippable equippableItem) && playerController.equippedItem != null)
+            {
+                equippableItem.Equip(playerController);
+            }
+                
+            else
+                objectToBeInspected.gameObject.SetActive(false);
+
             objectToBeInspected = null;
         }
        
