@@ -1,3 +1,5 @@
+using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,7 +15,14 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
     Vector3 offset = Vector3.zero;
     float storedFov;
     public Vector3 itemInspectorCamScale;
+    Vector3 clipTextOffset = new Vector3(-20, 10, 0);
+    TextMeshProUGUI clipText;
 
+    private void Update()
+    {
+        if(representedItem is Weapon weapon)
+            clipText.text = weapon.GetClip().currentAmount.ToString();
+    }
     public void InitRepresenter(Item item, InventoryGrid gridToAttach,InventoryController inventoryController,float fov)
     {
         this.storedFov = fov;
@@ -28,6 +37,7 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
         attachedGrid.AttachRepresenter(this);
         transform.SetParent(attachedGrid.transform);
         rectTransform.localPosition = Vector3.zero;
+        SetAmmoIndicatorIfNeeded(item,image);
 
     }
 
@@ -71,6 +81,24 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
         }
 
         rectTransform.localPosition = Vector3.zero;
+    }
+
+    private void SetAmmoIndicatorIfNeeded(Item item,Image image)
+    {
+        if (item.TryGetComponent<Weapon>(out Weapon weapon))
+        {
+            GameObject clipTextObject = new GameObject($"{item.gameObject.name} Clip");
+            clipTextObject.AddComponent<CanvasRenderer>();
+            clipTextObject.AddComponent<RectTransform>();
+            clipText = clipTextObject.AddComponent<TextMeshProUGUI>();
+            clipTextObject.transform.SetParent(transform);
+            clipText.alignment = TextAlignmentOptions.Center;
+            RectTransform cliptextObjectRect = clipTextObject.GetComponent<RectTransform>();
+            cliptextObjectRect.transform.position = new Vector3(image.transform.position.x + size.x / 2, 
+                image.transform.position.y - size.y / 2, image.transform.position.z) + clipTextOffset;
+            clipText.text = $"{weapon.GetClip().currentAmount}";
+
+        }
     }
 
 }

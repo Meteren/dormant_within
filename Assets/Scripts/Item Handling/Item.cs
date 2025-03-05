@@ -13,7 +13,6 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
 
     [Header("Rotation Segment")]
     public float scaleOffset;
-    [SerializeField] protected Collider coll;
     [SerializeField] protected float rotationSpeed;
 
     [Header("Conditions")]
@@ -42,7 +41,7 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
         rb = GetComponent<Rigidbody>();
         bound = GetBounds();
     }
-    private void Update()
+    protected void Update()
     {
         if (onItemCollect)
         {

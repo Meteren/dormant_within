@@ -44,7 +44,6 @@ public class WalkState : BasePlayerState
     {
     }
 
-  
     public override void OnStart()
     {
         base.OnStart();
@@ -131,6 +130,8 @@ public class RunState : BasePlayerState
 public class AimState : BasePlayerState
 {
     float transitionDuration = 0.2f;
+    float waitStance = 0.2f;
+    bool readyToShoot;
     public AimState(PlayerController playerController) : base(playerController)
     {
     }
@@ -138,22 +139,41 @@ public class AimState : BasePlayerState
     public override void OnStart()
     {
         base.OnStart();
+        if(playerController.comeFromShooting)
+            readyToShoot = true;      
     }
 
     public override void OnExit()
     {
         base.OnExit();
+        readyToShoot = false;
+        waitStance = 0.2f;
         playerController.aim = false;
+        playerController.comeFromShooting = false;
     }
 
     public override void Update()
     {
-        Debug.Log("Aim state");
-        if (Input.GetMouseButtonDown(0))
+        Debug.Log("Ready to shoot: " + readyToShoot);
+        if (!readyToShoot)
         {
-            playerController.shoot = true;
+            if (waitStance <= 0)
+                readyToShoot = true;
+            else
+                waitStance -= Time.deltaTime;
         }
-
+       
+        Debug.Log("Aim state");
+        if (Input.GetMouseButtonDown(0) && readyToShoot)
+        {
+            if (playerController.equippedItem is Weapon weapon && !weapon.GetClip().isEmpty)
+            {
+                playerController.shoot = true;
+            }
+            else
+                UIManager.instance.HandleIndicator("Out of ammo.",1f);
+        }
+ 
         if (Input.GetMouseButtonUp(1) || !playerController.isPressingM2)
             GameManager.instance.StartCoroutine(WaitTransition());
     }
@@ -163,6 +183,8 @@ public class AimState : BasePlayerState
         yield return new WaitForSeconds(transitionDuration);
         playerController.idle = true;
     }
+
+
 }
 
 public class ShootState : BasePlayerState
@@ -175,13 +197,16 @@ public class ShootState : BasePlayerState
     public override void OnStart()
     {
         base.OnStart();
-       
+        Weapon weapon = playerController.equippedItem as Weapon;
+        RaycastHit hit = weapon.Shoot();
+        HandleShooting(hit, weapon);
     }
 
     public override void OnExit()
     {
         base.OnExit();
         playerController.shoot = false;
+        playerController.comeFromShooting = true;
     }
 
     public override void Update()
@@ -193,6 +218,19 @@ public class ShootState : BasePlayerState
             if (stateInfo.normalizedTime >= 1)
                 playerController.aim = true;
 
+    }
+
+    private void HandleShooting(RaycastHit hit,Weapon weapon)
+    {
+        if (hit.collider != null)
+        {
+            Debug.Log($"{hit.transform.name} hitted.");
+            if (hit.transform.TryGetComponent<Enemy>(out Enemy enemy))
+                enemy.OnDamage(weapon.InflictDamage());
+        }
+        else
+            Debug.Log("Missed");
+       
     }
 }
 

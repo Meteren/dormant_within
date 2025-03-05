@@ -89,7 +89,10 @@ public class InspectorSceneController : MonoBehaviour
             inspectionText.text = " ";
             if(objectToBeInspected.TryGetComponent<IEquippable>(out IEquippable equippableItem) && playerController.equippedItem != null)
             {
-                equippableItem.Equip(playerController);
+                if(playerController.equippedItem == objectToBeInspected as IEquippable)
+                    equippableItem.Equip(playerController);
+                else
+                    objectToBeInspected.gameObject.SetActive(false);
             }
                 
             else

@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
     public bool walkBackwards;
     public bool shoot;
     public bool isPressingM2;
+    public bool comeFromShooting;
 
     [Header("Reference Point")]
     [SerializeField] private Transform reference;
@@ -158,6 +159,5 @@ public class PlayerController : MonoBehaviour
     {
         ResetState();
     }
-
 
 }

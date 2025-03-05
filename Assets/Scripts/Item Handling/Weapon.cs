@@ -8,7 +8,16 @@ public class Weapon : Item, IEquippable
     [SerializeField] private string positionName;
 
     [Header("Muzzle Point")]
-    [SerializeField] private Transform muzzlePoint; 
+    [SerializeField] private Transform muzzlePoint;
+
+    [Header("Range")]
+    [SerializeField] private float weapontRange;
+
+    [Header("Clip")]
+    [SerializeField] private Clip clip;
+
+    [Header("Layer To Hit")]
+    [SerializeField] private LayerMask hitMask;
     protected new void Start()
     {
         base.Start();
@@ -25,14 +34,42 @@ public class Weapon : Item, IEquippable
             SetCollidersActive(false);
             SetRigidBodyKinematic(true);
             transform.gameObject.SetActive(true);
-            if(playerController.equippedItem == null)
+            if(playerController.equippedItem != this as IEquippable)
                 UIManager.instance.HandleIndicator($"{itemName} equipped.", 2f);
             playerController.equippedItem = this;
         }
         else
             UIManager.instance.HandleIndicator("Can't equip", 2f);       
       
-    } 
+    }
+
+    public virtual void Unequip()
+    {
+        transform.SetParent(null);
+        gameObject.SetActive(false);
+        
+    }
+
+    public virtual RaycastHit Shoot()
+    {
+        Ray ray = new Ray(muzzlePoint.position, muzzlePoint.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, weapontRange,hitMask))
+            Debug.DrawRay(muzzlePoint.position, muzzlePoint.forward * weapontRange, Color.red, 1f);
+        else
+        {
+            Debug.DrawRay(muzzlePoint.position, muzzlePoint.forward * weapontRange, Color.green, 1f);
+            hit = default;
+        }      
+        clip.DecreaseAmount(1);
+        return hit;
+    }
+
+    public virtual int InflictDamage()
+    {
+        return 0;
+    }
+
+    public Clip GetClip() => clip;
 
     private Transform FindPositionToAnchor(Transform playerTransform)
     {
@@ -46,5 +83,5 @@ public class Weapon : Item, IEquippable
 
         return null;
     }
-
+   
 }
