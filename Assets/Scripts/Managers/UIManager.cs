@@ -7,7 +7,7 @@ public class UIManager : Singleton<UIManager>
 {
     public GameObject itemCollectedPanel;
     public GameObject inventory;
-    public GameObject indicatorText;
+    [SerializeField] private GameObject indicatorText;
 
     [Header("Conditions")]
     [SerializeField] private bool inventoryActive;

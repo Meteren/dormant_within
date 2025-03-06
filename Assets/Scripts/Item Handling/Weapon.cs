@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Weapon : Item, IEquippable
+public class Weapon : Item, IEquippable, ICombinable
 {
     [Header("Position To Anchor")]
     [SerializeField] private string positionName;
@@ -50,6 +50,28 @@ public class Weapon : Item, IEquippable
         
     }
 
+    public void OnTryCombine(ItemRepresenter representer)
+    {
+        Clip clip = representer.representedItem as Clip;
+        if (!this.clip.IsFull())
+        {
+            if (clip == null)
+            {
+                UIManager.instance.HandleIndicator($"Can't combine {ToString()} with {representer.representedItem.ToString()}", 2f);
+                return;
+            }
+            if (!clip.isEmpty)
+            {
+                this.clip.IncreaseAmount(clip);
+                UIManager.instance.HandleIndicator("Reloaded.", 2f);
+            }      
+            else
+                UIManager.instance.HandleIndicator("Clip is empty. Can't reload.", 2f);
+        }
+        else
+            UIManager.instance.HandleIndicator("Can't reload. Ammo is full.",2f);
+       
+    }
     public virtual RaycastHit Shoot()
     {
         Ray ray = new Ray(muzzlePoint.position, muzzlePoint.forward);
@@ -83,5 +105,5 @@ public class Weapon : Item, IEquippable
 
         return null;
     }
-   
+
 }

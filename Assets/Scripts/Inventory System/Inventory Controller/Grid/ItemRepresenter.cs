@@ -15,13 +15,15 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
     Vector3 offset = Vector3.zero;
     float storedFov;
     public Vector3 itemInspectorCamScale;
-    Vector3 clipTextOffset = new Vector3(-20, 10, 0);
+    Vector3 clipTextOffset = new Vector3(-40, 10, 0);
     TextMeshProUGUI clipText;
 
     private void Update()
     {
-        if(representedItem is Weapon weapon)
-            clipText.text = weapon.GetClip().currentAmount.ToString();
+        if (representedItem is Weapon weapon)
+            clipText.text = $"{weapon.GetClip().currentAmount}/{weapon.GetClip().maxAmount}";
+        if (representedItem is Clip clip)
+            clipText.text = $"{clip.currentAmount}/{clip.maxAmount}";
     }
     public void InitRepresenter(Item item, InventoryGrid gridToAttach,InventoryController inventoryController,float fov)
     {
@@ -37,7 +39,7 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
         attachedGrid.AttachRepresenter(this);
         transform.SetParent(attachedGrid.transform);
         rectTransform.localPosition = Vector3.zero;
-        SetAmmoIndicatorIfNeeded(item,image);
+        SetAmmoIndicatorIfNeeded(item);
 
     }
 
@@ -65,27 +67,47 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
         }
 
     }
-
     public void OnPointerUp(PointerEventData eventData)
     {
-        if(inventoryController.TryGetGrid(this,out InventoryGrid grid) && grid.Representer == null)
+        if (Input.GetMouseButtonUp(0))
         {
-            attachedGrid.DetachRepresenter();
-            transform.SetParent(grid.transform);
-            grid.AttachRepresenter(this);
-            attachedGrid = grid;
-        }
-        else
-        {
-            transform.SetParent(attachedGrid.transform);
-        }
+            if (inventoryController.TryGetGrid(this, out InventoryGrid grid))
+            {
+                if (grid.Representer == null)
+                {
+                    attachedGrid.DetachRepresenter();
+                    transform.SetParent(grid.transform);
+                    grid.AttachRepresenter(this);
+                    attachedGrid = grid;
+                }
+                else if(grid != null && grid.Representer.representedItem != representedItem)
+                {
+                    Debug.Log("Combine init.");
+                    ICombinable combinable = grid.Representer.representedItem.TryGetComponent<ICombinable>(
+                        out ICombinable combinableItem) ? combinableItem : null;
+                    if (combinable != null)
+                        combinable.OnTryCombine(this);
+                    else
+                         UIManager.instance.HandleIndicator($"{grid.Representer.representedItem.ToString()} is not combinable.", 2f);
 
-        rectTransform.localPosition = Vector3.zero;
+                }
+
+            }
+            transform.SetParent(attachedGrid.transform);
+            rectTransform.localPosition = Vector3.zero;
+        }
+       
     }
 
-    private void SetAmmoIndicatorIfNeeded(Item item,Image image)
+    private void SetAmmoIndicatorIfNeeded(Item item)
     {
-        if (item.TryGetComponent<Weapon>(out Weapon weapon))
+        Weapon weapon;
+        Clip clip;
+
+        item.TryGetComponent<Weapon>(out weapon);
+        item.TryGetComponent<Clip>(out clip);
+
+        if (weapon != null || clip != null)
         {
             GameObject clipTextObject = new GameObject($"{item.gameObject.name} Clip");
             clipTextObject.AddComponent<CanvasRenderer>();
@@ -95,9 +117,7 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
             clipText.alignment = TextAlignmentOptions.Center;
             RectTransform cliptextObjectRect = clipTextObject.GetComponent<RectTransform>();
             cliptextObjectRect.transform.position = new Vector3(image.transform.position.x + size.x / 2, 
-                image.transform.position.y - size.y / 2, image.transform.position.z) + clipTextOffset;
-            clipText.text = $"{weapon.GetClip().currentAmount}";
-
+                image.transform.position.y - size.y / 2, image.transform.position.z) + clipTextOffset;   
         }
     }
 

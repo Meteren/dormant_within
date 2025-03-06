@@ -36,6 +36,9 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
     private Bounds bound;
     private HashSet<string> referenceToInventory;
 
+    private Vector3 originalItemPlace;
+    private Vector3 originalRotation;
+
     protected void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -60,7 +63,15 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
                }
                else
                {
-
+                    UIManager.instance.HandleIndicator("Inventory is full.", 2f);
+                    onItemCollect = false;
+                    UIManager.instance.itemCollectedPanel.SetActive(false);
+                    transform.SetParent(null);
+                    transform.position = originalItemPlace;
+                    transform.rotation = Quaternion.Euler(originalRotation);
+                    rb.angularVelocity = Vector3.zero;
+                    transform.localScale = originalScale;
+  
                }
                     
             }
@@ -85,6 +96,8 @@ public abstract class Item : MonoBehaviour, ICollectible, IInspectable
     }
     public void OnCollect(HashSet<string> inventory)
     {
+        originalItemPlace = transform.position;
+        originalRotation = transform.rotation.eulerAngles;
         referenceToInventory = inventory;
         AttachObjectToCamera();
         ScaleToFitCamera();

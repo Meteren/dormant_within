@@ -58,7 +58,8 @@ public class GridMenu : MonoBehaviour
             if (gameObjectToBeInspected.gameObject.activeSelf)
                 gameObjectToBeInspected.gameObject.SetActive(false);
             if (gameObjectToBeInspected.TryGetComponent<IEquippable>(out IEquippable equippableItem))
-                equippableItem.Equip(playerController);
+                if(playerController.equippedItem != null)
+                    equippableItem.Equip(playerController);
         }
               
         Item item = representer.representedItem;

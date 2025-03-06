@@ -53,11 +53,8 @@ public class InventoryController : MonoBehaviour
             return true;
         }
         else
-        {
-            //show a message to indicate that inventory is full
-            return false;
-        }
-        
+             return false;
+    
     }
 
     public bool TryGetEmptyGrid(out InventoryGrid emptyGrid)
