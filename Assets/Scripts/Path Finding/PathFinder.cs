@@ -30,13 +30,13 @@ public class PathFinder : MonoBehaviour
     }
     private void CreateGrids(int radius)
     {
-        gridLenght = 3;
+        gridLenght = radius * 2 + 1;
         pathGrids = new PathGrid[gridLenght, gridLenght];
         Vector3 agentPosition = transform.position;
         Vector2 bottomSize = new Vector2(reference.size.x, reference.size.z);
         Debug.Log($"Size x: {bottomSize.x} - Size y: {bottomSize.y}");
         Vector3 startPosition = new Vector3(agentPosition.x - 
-            (bottomSize.x * 1), agentPosition.y, agentPosition.z + (bottomSize.y * 1));
+            (bottomSize.x * radius), agentPosition.y, agentPosition.z + (bottomSize.y * radius));
         float capturedX = startPosition.x;
         Debug.Log($"Size x: {bottomSize.x} - Size y: {bottomSize.y}");
 
@@ -54,7 +54,7 @@ public class PathFinder : MonoBehaviour
             startPosition.x = capturedX;
         }
 
-        centerGrid = pathGrids[1, 1];
+        centerGrid = pathGrids[radius, radius];
 
     }
 
