@@ -1,11 +1,16 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Linq;
 
 public class PathGrid : MonoBehaviour
 {
     public int X {  get; private set; }
     public int Y { get; private set; }
+
+    public float GScore {  get; set; }
+    public float FScore { get;set; }
 
     Transform agentTransform;
 
@@ -15,16 +20,40 @@ public class PathGrid : MonoBehaviour
 
     Vector3 offset;
 
+    Vector3 originalPos;
+
+    float sphereRadius = 3f;
+
+    [Header("LayerMask")]
+    [SerializeField] private LayerMask layerMask; 
+
+
+    [Header("Grids")]
+    [SerializeField] private Transform grids;
+
+    private void Awake()
+    {
+        layerMask = LayerMask.GetMask("Obstacle");
+    }
+
     private void Update()
     {
-        Debug.Log($"{X}-{Y} isMovable: {isMovable}");
-        transform.rotation = Quaternion.identity;
-        transform.position = agentTransform.position + offset;
 
-        if (objectsOccupyingGrid.Count == 0)
-            isMovable = true;
-        else
-            isMovable = false;
+        //transform.rotation = Quaternion.identity;
+        //transform.position = agentTransform.position + offset;
+        //transform.position = originalPos;
+
+        isMovable = objectsOccupyingGrid.Count > 0 ? false : true;
+
+        /*Vector3 size = GetComponent<BoxCollider>().size * 0.5f;
+        Vector3 boxCenter = transform.position;
+        Collider[] collidedObjects = Physics.OverlapBox(boxCenter, size, Quaternion.identity, layerMask);
+
+        Debug.Log("Collided object count:" + collidedObjects.Length);
+
+        isMovable = collidedObjects.Length != 0 ? false : true;*/
+       // Debug.Log($"{X}-{Y} isMovable: {isMovable}");
+
     }
 
     public void InitPathGrid(Transform agentTransform,BoxCollider boxCollider,Vector3 position, int x, int y)
@@ -33,21 +62,23 @@ public class PathGrid : MonoBehaviour
         this.Y = y;
         this.agentTransform = agentTransform;
         transform.position = position;
+        originalPos = position;
         offset = transform.position - agentTransform.position;
         gameObject.layer = LayerMask.NameToLayer("PathGrid");
-        isMovable = true;
+        //isMovable = true;
         BoxCollider collider = transform.AddComponent<BoxCollider>();
         collider.isTrigger = true;
         Vector3 collWorldSize = boxCollider.size;
         collWorldSize.Scale(agentTransform.lossyScale);
         collider.size = collWorldSize;
-        transform.SetParent(agentTransform);
+        //transform.SetParent(agentTransform);
+        grids = GameObject.Find("Grids").transform;
+        transform.SetParent(grids);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Trigger enter");
-        Debug.Log($"Trigger enter object: {other.name}");
+      
         if (other.TryGetComponent<Renderer>(out Renderer renderer))
             objectsOccupyingGrid.Add(renderer);
 
@@ -55,8 +86,7 @@ public class PathGrid : MonoBehaviour
     }
     private void OnTriggerExit(Collider other)
     {
-        Debug.Log("Trigger exit");
-        Debug.Log($"Trigger exit object: {other.name}");
+       
         if (other.TryGetComponent<Renderer>(out Renderer renderer))
             objectsOccupyingGrid.Remove(renderer);
     }
