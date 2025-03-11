@@ -15,7 +15,7 @@ public class PathFinder : MonoBehaviour
 
     int[,] directions;
 
-    PathGrid centerGrid;
+    public PathGrid centerGrid;
 
     private void Start()
     {
@@ -59,16 +59,16 @@ public class PathFinder : MonoBehaviour
 
     }
 
-    public List<PathGrid> DrawPath(Vector3 positionToMove)
+    public List<PathGrid> DrawPath(PathGrid startGrid,Vector3 positionToMove)
     {
-        List<PathGrid> foundPath = FindPath(positionToMove);
+        List<PathGrid> foundPath = FindPath(startGrid,positionToMove);
         return foundPath;
     }
 
-    private List<PathGrid> FindPath(Vector3 positionToMove)
+    private List<PathGrid> FindPath(PathGrid startGrid,Vector3 positionToMove)
     {
         List<PathGrid> gridList = ExtractGridsToList();
-        List<PathGrid> openGrids = new List<PathGrid>() {centerGrid};
+        List<PathGrid> openGrids = new List<PathGrid>() {startGrid};
         HashSet<PathGrid> closedGrids = new HashSet<PathGrid>();
         Dictionary<PathGrid,PathGrid> cameFrom = new Dictionary<PathGrid,PathGrid>();
         PathGrid destinationGrid = GetClosestGridToDestination(positionToMove);
@@ -82,8 +82,8 @@ public class PathFinder : MonoBehaviour
             grid.FScore = float.MaxValue;
         }
 
-        centerGrid.GScore = 0;
-        centerGrid.FScore = centerGrid.GScore + centerGrid.CalculateDistance(destinationGrid.transform.position);
+        startGrid.GScore = 0;
+        startGrid.FScore = centerGrid.GScore + centerGrid.CalculateDistance(destinationGrid.transform.position);
 
         while(openGrids.Count > 0)
         {
@@ -118,18 +118,15 @@ public class PathFinder : MonoBehaviour
             }
 
         }
-        Debug.Log("Ready to return null");
         return new List<PathGrid>();
     }
 
     private List<PathGrid> ConstructPath(Dictionary<PathGrid, PathGrid> cameFrom, PathGrid destinationGrid)
     {
-        Debug.Log("Ready to construct path");
         PathGrid grid = destinationGrid;
         List<PathGrid> path = new List<PathGrid>();
         while(cameFrom.ContainsKey(grid))
         {
-            Debug.Log("Construct");
             path.Add(grid);
             grid = cameFrom[grid];
 
@@ -153,7 +150,6 @@ public class PathFinder : MonoBehaviour
             if(neighbourGrid != null)
             {
                 neighbours.Add(neighbourGrid);
-                //Debug.Log("Neighbour:" + neighbourGrid.name);
             }
                 
         }

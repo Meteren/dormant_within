@@ -1,8 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Linq;
 
 public class PathGrid : MonoBehaviour
 {
@@ -65,7 +63,6 @@ public class PathGrid : MonoBehaviour
         originalPos = position;
         offset = transform.position - agentTransform.position;
         gameObject.layer = LayerMask.NameToLayer("PathGrid");
-        //isMovable = true;
         BoxCollider collider = transform.AddComponent<BoxCollider>();
         collider.isTrigger = true;
         Vector3 collWorldSize = boxCollider.size;

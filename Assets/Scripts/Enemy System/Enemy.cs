@@ -6,12 +6,12 @@ using UnityEngine.UIElements;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private int healthAmount;
-    [SerializeField] private PathFinder finder;
+    [SerializeField] private PathFinder pathFinder;
     [Header("LOS")]
     [SerializeField] private int radius;
 
     [Header("Patrol Points")]
-    [SerializeField] private Transform destination;
+    [SerializeField] private List<Transform> patrolPoints;
 
     bool pathInProgress;
 
@@ -19,13 +19,13 @@ public class Enemy : MonoBehaviour
 
     int pathIndex;
 
-    float speed = 2f;
+    float speed = 5f;
 
     List<PathGrid> path;
     private void Start()
     {
-        finder = GetComponent<PathFinder>();
-        finder.InitPathGridTable(radius);
+        pathFinder = GetComponent<PathFinder>();
+        pathFinder.InitPathGridTable(radius);
         StartCoroutine(St());
     }
 
@@ -39,11 +39,19 @@ public class Enemy : MonoBehaviour
             {
                 if (pathIndex < path.Count - 1)
                     pathIndex++;
+                else
+                {
+                    if (patrolIndex < patrolPoints.Count - 1)
+                        patrolIndex++;
+                    else
+                        patrolIndex = 0;
+                    PathGrid startGrid = path[path.Count - 1];
+                    path = pathFinder.DrawPath(startGrid, patrolPoints[patrolIndex].position);
+                    pathIndex = 0;
+                }
             }
-        }
 
-       
-            
+        }         
          
     }
     public virtual void OnDamage(int damage)
@@ -59,7 +67,7 @@ public class Enemy : MonoBehaviour
     {
         yield return new WaitForSeconds(7f);
         Debug.Log("Path initted");
-        path = finder.DrawPath(destination.position);
+        path = pathFinder.DrawPath(pathFinder.centerGrid,patrolPoints[patrolIndex].position);
         Debug.Log("Path count:" + path.Count);
         pathInProgress = true;
         foreach (var pathGrid in path)
