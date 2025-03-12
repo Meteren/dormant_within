@@ -1,5 +1,7 @@
 
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 public class IdleState : BasePlayerState
 {
@@ -132,15 +134,25 @@ public class AimState : BasePlayerState
     float transitionDuration = 0.2f;
     float waitStance = 0.2f;
     bool readyToShoot;
+    bool enemySpotted;
+   
+    float rotationSpeed = 4f;
     public AimState(PlayerController playerController) : base(playerController)
     {
     }
-
     public override void OnStart()
     {
         base.OnStart();
         if(playerController.comeFromShooting)
-            readyToShoot = true;      
+            readyToShoot = true;
+       
+        Debug.Log("Closest enemy spotted");
+        if(playerController.enemiesInRange.Count > 0)
+            playerController.lockedEnemy = GetClosestEnemy();
+       
+        foreach (var enemy in playerController.enemiesInRange)
+            Debug.Log(enemy.name);
+        
     }
 
     public override void OnExit()
@@ -150,10 +162,21 @@ public class AimState : BasePlayerState
         waitStance = 0.2f;
         playerController.aim = false;
         playerController.comeFromShooting = false;
+        lockOn = false;
     }
 
     public override void Update()
     {
+        if (!enemySpotted)
+        {
+            if(playerController.enemiesInRange.Count > 0)
+                playerController.lockedEnemy = GetClosestEnemy();
+                
+            if (playerController.lockedEnemy != null)
+                enemySpotted = true;
+        }           
+        if(playerController.enemiesInRange.Count > 0)
+            AimAtClosest();
         Debug.Log("Ready to shoot: " + readyToShoot);
         if (!readyToShoot)
         {
@@ -162,7 +185,6 @@ public class AimState : BasePlayerState
             else
                 waitStance -= Time.deltaTime;
         }
-       
         Debug.Log("Aim state");
         if (Input.GetMouseButtonDown(0) && readyToShoot)
         {
@@ -183,8 +205,6 @@ public class AimState : BasePlayerState
         yield return new WaitForSeconds(transitionDuration);
         playerController.idle = true;
     }
-
-
 }
 
 public class ShootState : BasePlayerState
@@ -197,6 +217,7 @@ public class ShootState : BasePlayerState
     public override void OnStart()
     {
         base.OnStart();
+        Debug.Log("On shooting start");
         Weapon weapon = playerController.equippedItem as Weapon;
         RaycastHit hit = weapon.Shoot();
         HandleShooting(hit, weapon);
@@ -211,15 +232,18 @@ public class ShootState : BasePlayerState
 
     public override void Update()
     {
-        Debug.Log("Shoot State");
         base.Update();
+        if (playerController.enemiesInRange.Count > 0)
+            AimAtClosest();
+        Debug.Log("Shoot State");
+
+        if (playerController.anim.IsInTransition(0)) return;
+
         stateInfo = playerController.anim.GetCurrentAnimatorStateInfo(0);
         if (stateInfo.IsName("shooting"))
             if (stateInfo.normalizedTime >= 1)
                 playerController.aim = true;
-
     }
-
     private void HandleShooting(RaycastHit hit,Weapon weapon)
     {
         if (hit.collider != null)

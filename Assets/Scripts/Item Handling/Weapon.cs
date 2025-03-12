@@ -8,7 +8,7 @@ public class Weapon : Item, IEquippable, ICombinable
     [SerializeField] private string positionName;
 
     [Header("Muzzle Point")]
-    [SerializeField] private Transform muzzlePoint;
+    public Transform muzzlePoint;
 
     [Header("Range")]
     [SerializeField] private float weapontRange;
@@ -74,6 +74,7 @@ public class Weapon : Item, IEquippable, ICombinable
     }
     public virtual RaycastHit Shoot()
     {
+        Debug.Log("Shoot");
         Ray ray = new Ray(muzzlePoint.position, muzzlePoint.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, weapontRange,hitMask))
             Debug.DrawRay(muzzlePoint.position, muzzlePoint.forward * weapontRange, Color.red, 1f);

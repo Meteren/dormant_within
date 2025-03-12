@@ -5,8 +5,11 @@ using UnityEngine.UIElements;
 
 public class Enemy : MonoBehaviour
 {
+    PlayerController playerConyroller => 
+        GameManager.instance.blackboard.TryGetValue("PlayerController", out PlayerController _controller) ? _controller : null;
     [SerializeField] private int healthAmount;
     [SerializeField] private PathFinder pathFinder;
+
     [Header("LOS")]
     [SerializeField] private int radius;
 
@@ -19,9 +22,12 @@ public class Enemy : MonoBehaviour
 
     int pathIndex;
 
-    float speed = 5f;
+    float speed = 3.5f;
 
     List<PathGrid> path;
+
+    [Header("Conditions")]
+    public bool isDead;
     private void Start()
     {
         pathFinder = GetComponent<PathFinder>();
@@ -69,26 +75,24 @@ public class Enemy : MonoBehaviour
         {
             transform.position = Vector3.MoveTowards(transform.position, path[pathIndex].transform.position, Time.deltaTime * speed);
 
-            if (Vector3.Distance(transform.position, path[pathIndex].transform.position) <= 0.05f)
+            if (Vector3.Distance(transform.position, path[0].transform.position) <= 0.05f)
             {
                 if (pathIndex < path.Count - 1)
-                    pathIndex++;
+                {
+
+                }     
                 else
                 {
                     if (patrolIndex < patrolPoints.Count - 1)
                         patrolIndex++;
                     else
                         patrolIndex = 0;
-                    PathGrid startGrid = path[path.Count - 1];
-                    path = pathFinder.DrawPath(transform.position, patrolPoints[patrolIndex].position);
-                    pathIndex = 0;
                 }
                 List<PathGrid> newPath = pathFinder.DrawPath(transform.position, patrolPoints[patrolIndex].position);
                 if (ShouldPathChange(newPath))
                 {
                     path = newPath;
                     Debug.Log("Path changed");
-                    pathIndex = 0;
                 }
 
             }
@@ -101,7 +105,13 @@ public class Enemy : MonoBehaviour
         Debug.Log($"Amount of damage inflicted: {damage} - Remained health: {healthAmount}");
 
         if(healthAmount <= 0)
+        {
+            isDead = true;
+            if(playerConyroller.enemiesInRange.Contains(this))
+                playerConyroller.enemiesInRange.Remove(this);   
             Destroy(gameObject);
+        }
+            
     }
 
     private IEnumerator St()
@@ -123,4 +133,7 @@ public class Enemy : MonoBehaviour
 
         return newPath[0] != path[0];
     }
+
+    public float CalculatePriority(PlayerController p_controller) =>
+        Vector3.Distance(p_controller.transform.position, transform.position);
 }

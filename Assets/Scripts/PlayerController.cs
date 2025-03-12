@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -34,6 +35,15 @@ public class PlayerController : MonoBehaviour
 
     [Header("Equipped Item")]
     public IEquippable equippedItem;
+
+    [Header("Aim Radius")]
+    public float aimRadius;
+
+    [Header("Radius Check")]
+    public List<Enemy> enemiesInRange;
+
+    [Header("Locked Enemy")]
+    public Enemy lockedEnemy;
     public Vector3 ForwardDirection {  get; private set; }
 
     StateMachine playerStateMachine = new StateMachine();
@@ -86,6 +96,7 @@ public class PlayerController : MonoBehaviour
     {
         SetForwardDirection();
         Rotate();
+
     }
 
     void Update()
@@ -95,6 +106,7 @@ public class PlayerController : MonoBehaviour
         SetRotationDirection();
         UpdateAnimations();
         playerStateMachine.Update();
+
     }
 
     private void SetRotationDirection()
@@ -131,33 +143,34 @@ public class PlayerController : MonoBehaviour
         Vector3 rotation = transform.eulerAngles;
         if (direction == RotationDirection.left)
         {
-            Debug.Log("Left");
             rotation.y -= turnSpeed * Time.deltaTime;
         }
         else if (direction == RotationDirection.right)
         {
-            Debug.Log("Right");
             rotation.y += turnSpeed * Time.deltaTime;
         }
         else
         {
-            Debug.Log("Stay");
             return;
         }
         transform.rotation = Quaternion.Euler(rotation);
 
     }
-
     private void ResetState()
     {
         idle = true;
         walkBackwards = aim = run = walk = false;
         playerStateMachine.CurrentState = baseState;
-    }
+    } 
 
     private void OnDisable()
     {
         ResetState();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(transform.position, aimRadius);
     }
 
 }
