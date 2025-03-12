@@ -1,8 +1,9 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
-public class PathGrid : MonoBehaviour
+public class PathGrid : MonoBehaviour, IComparable<PathGrid>
 {
     public int X {  get; private set; }
     public int Y { get; private set; }
@@ -34,24 +35,29 @@ public class PathGrid : MonoBehaviour
         layerMask = LayerMask.GetMask("Obstacle");
     }
 
-    private void Update()
+    /*private void Update()
     {
 
         //transform.rotation = Quaternion.identity;
         //transform.position = agentTransform.position + offset;
         //transform.position = originalPos;
 
-        isMovable = objectsOccupyingGrid.Count > 0 ? false : true;
 
-        /*Vector3 size = GetComponent<BoxCollider>().size * 0.5f;
+
+        Vector3 size = GetComponent<BoxCollider>().size * 0.5f;
         Vector3 boxCenter = transform.position;
         Collider[] collidedObjects = Physics.OverlapBox(boxCenter, size, Quaternion.identity, layerMask);
 
         Debug.Log("Collided object count:" + collidedObjects.Length);
 
-        isMovable = collidedObjects.Length != 0 ? false : true;*/
+        isMovable = collidedObjects.Length != 0 ? false : true;
        // Debug.Log($"{X}-{Y} isMovable: {isMovable}");
 
+    }*/
+
+    private void FixedUpdate()
+    {
+        isMovable = objectsOccupyingGrid.Count > 0 ? false : true;
     }
 
     public void InitPathGrid(Transform agentTransform,BoxCollider boxCollider,Vector3 position, int x, int y)
@@ -78,8 +84,7 @@ public class PathGrid : MonoBehaviour
       
         if (other.TryGetComponent<Renderer>(out Renderer renderer))
             objectsOccupyingGrid.Add(renderer);
-
-            
+          
     }
     private void OnTriggerExit(Collider other)
     {
@@ -90,4 +95,8 @@ public class PathGrid : MonoBehaviour
 
     public float CalculateDistance(Vector3 positionToMove) => Vector3.Distance(transform.position, positionToMove);
 
+    public int CompareTo(PathGrid other)
+    {
+        return FScore.CompareTo(other.FScore);
+    }
 }

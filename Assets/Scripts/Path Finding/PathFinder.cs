@@ -7,6 +7,7 @@ using UnityEngine;
 public class PathFinder : MonoBehaviour
 {   
     PathGrid[,] pathGrids;
+    List<PathGrid> extractedGridList;
 
     [Header("Reference")]
     [SerializeField] private BoxCollider reference;
@@ -23,6 +24,7 @@ public class PathFinder : MonoBehaviour
         {
             {0,1},{1,0},{-1,0},{0,-1},{1,1},{-1,-1},{1,-1},{-1,1}
         };
+      
     }
 
     public void InitPathGridTable(int gridRadius)
@@ -54,71 +56,70 @@ public class PathFinder : MonoBehaviour
             startPosition.z -= bottomSize.y;
             startPosition.x = capturedX;
         }
-
+        extractedGridList = ExtractGridsToList();
         centerGrid = pathGrids[radius, radius];
 
     }
 
-    public List<PathGrid> DrawPath(PathGrid startGrid,Vector3 positionToMove)
+    public List<PathGrid> DrawPath(Vector3 startPosition,Vector3 positionToMove)
     {
-        List<PathGrid> foundPath = FindPath(startGrid,positionToMove);
+        List<PathGrid> foundPath = FindPath(startPosition,positionToMove);
         return foundPath;
     }
 
-    private List<PathGrid> FindPath(PathGrid startGrid,Vector3 positionToMove)
+    public List<PathGrid> FindPath(Vector3 startPosition, Vector3 positionToMove)
     {
-        List<PathGrid> gridList = ExtractGridsToList();
-        List<PathGrid> openGrids = new List<PathGrid>() {startGrid};
+        List<PathGrid> gridList = extractedGridList;
+        PathGrid startGrid = GetClosestGridToPosition(startPosition);
+        PathGrid destinationGrid = GetClosestGridToPosition(positionToMove);
+
+        if (destinationGrid == null || startGrid == null) return new List<PathGrid>();
+        
+        PriorityQueue<PathGrid> openGrids = new PriorityQueue<PathGrid>();
         HashSet<PathGrid> closedGrids = new HashSet<PathGrid>();
-        Dictionary<PathGrid,PathGrid> cameFrom = new Dictionary<PathGrid,PathGrid>();
-        PathGrid destinationGrid = GetClosestGridToDestination(positionToMove);
+        Dictionary<PathGrid, PathGrid> cameFrom = new Dictionary<PathGrid, PathGrid>();
 
-        if (destinationGrid != null)
-            Debug.Log("Name of dest grid:" + destinationGrid.name);
-
-        foreach(var grid in gridList)
+        foreach (var grid in gridList)
         {
             grid.GScore = float.MaxValue;
             grid.FScore = float.MaxValue;
         }
 
         startGrid.GScore = 0;
-        startGrid.FScore = centerGrid.GScore + centerGrid.CalculateDistance(destinationGrid.transform.position);
+        startGrid.FScore = startGrid.CalculateDistance(destinationGrid.transform.position);
+        openGrids.Enqueue(startGrid);
 
-        while(openGrids.Count > 0)
+        while (openGrids.Count > 0)
         {
-            //Debug.Log("Loop");
-            PathGrid currentGrid = openGrids.OrderBy(g => g.FScore).First();
+            PathGrid currentGrid = openGrids.Dequeue();
 
             if (currentGrid == destinationGrid)
-                return ConstructPath(cameFrom,destinationGrid);
+                return ConstructPath(cameFrom, destinationGrid);
 
-            openGrids.Remove(currentGrid);
             closedGrids.Add(currentGrid);
 
-            List<PathGrid> neighbours = GetNeighbours(currentGrid);
-
-            foreach(var neighbour in neighbours)
+            foreach (var neighbor in GetNeighbours(currentGrid))
             {
-                //Debug.Log($"{X}-{Y} isMovable: {isMovable}");
-                if (closedGrids.Contains(neighbour) || !neighbour.isMovable)
-                    continue;
+                if(neighbor != destinationGrid)
+                    if (closedGrids.Contains(neighbor) || !neighbor.isMovable)
+                        continue;
 
-                float tentativeGScore = currentGrid.GScore + currentGrid.CalculateDistance(neighbour.transform.position);
+                float tentativeGScore = currentGrid.GScore + currentGrid.CalculateDistance(neighbor.transform.position);
 
-                if(tentativeGScore < neighbour.GScore)
+                if (tentativeGScore < neighbor.GScore)
                 {
-                    neighbour.GScore = tentativeGScore;
-                    neighbour.FScore = neighbour.GScore + neighbour.CalculateDistance(destinationGrid.transform.position);
-                    cameFrom[neighbour] = currentGrid;
+                    cameFrom[neighbor] = currentGrid;
+                    neighbor.GScore = tentativeGScore;
+                    neighbor.FScore = neighbor.GScore + neighbor.CalculateDistance(destinationGrid.transform.position);
 
-                    if(!openGrids.Contains(neighbour))
-                        openGrids.Add(neighbour);
+                    if (!openGrids.Contains(neighbor))
+                        openGrids.Enqueue(neighbor);
+                        
                 }
             }
-
         }
-        return new List<PathGrid>();
+
+        return new List<PathGrid>(); 
     }
 
     private List<PathGrid> ConstructPath(Dictionary<PathGrid, PathGrid> cameFrom, PathGrid destinationGrid)
@@ -134,8 +135,6 @@ public class PathFinder : MonoBehaviour
         path.Reverse();
         return path;
     }
-
-
     private List<PathGrid> GetNeighbours(PathGrid grid)
     {
         List<PathGrid> neighbours = new List<PathGrid>();
@@ -163,15 +162,11 @@ public class PathFinder : MonoBehaviour
             grid.Y + directions[i, 1] < pathGrids.GetLength(1) && grid.Y + directions[i, 1] >= 0;   
     }
 
-    private PathGrid GetClosestGridToDestination(Vector3 destination)
+    private PathGrid GetClosestGridToPosition(Vector3 position)
     {
-        List<PathGrid> gridList = ExtractGridsToList();
+        List<PathGrid> gridList = extractedGridList;
 
-        gridList.Sort((x, y) => 
-        x.CalculateDistance(destination).CompareTo(y.CalculateDistance(destination)));
-        //Debug.Log($"Closest grid {gridList[0].name}");
-
-        return gridList[0];
+        return gridList.Aggregate((closest, next) => next.CalculateDistance(position) < closest.CalculateDistance(position) ? next : closest);
     }
 
     private List<PathGrid> ExtractGridsToList()
@@ -184,7 +179,6 @@ public class PathFinder : MonoBehaviour
                 gridList.Add(pathGrids[i, j]);
             }
         }
-
         return gridList;
     }
 
