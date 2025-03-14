@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,13 +9,21 @@ public class Enemy : MonoBehaviour
     PlayerController playerConyroller => 
         GameManager.instance.blackboard.TryGetValue("PlayerController", out PlayerController _controller) ? _controller : null;
     [SerializeField] private int healthAmount;
-    [SerializeField] private PathFinder pathFinder;
+
+    [Header("PathFinder")]
+    public PathFinder pathFinder;
 
     [Header("LOS")]
-    [SerializeField] private int radius;
+    [SerializeField] private int gridRadius;
+    [SerializeField] private float checkAreaRadius;
 
     [Header("Patrol Points")]
-    [SerializeField] private List<Transform> patrolPoints;
+    public List<Transform> patrolPoints;
+
+    [Header("Player Mask")]
+    [SerializeField] private LayerMask playerMask;
+    [Header("Ray Mask")]
+    [SerializeField] private LayerMask rayMask;
 
     bool pathInProgress;
 
@@ -25,14 +34,37 @@ public class Enemy : MonoBehaviour
     float speed = 3.5f;
 
     List<PathGrid> path;
+    BehaviourTree enemyBehaviourTree;
+    float yOffset = 5f;
 
     [Header("Conditions")]
     public bool isDead;
     private void Start()
     {
+        playerMask = LayerMask.GetMask("Player");
         pathFinder = GetComponent<PathFinder>();
-        pathFinder.InitPathGridTable(radius);
-        StartCoroutine(St());
+        pathFinder.InitPathGridTable(gridRadius);
+
+        enemyBehaviourTree = new BehaviourTree();
+
+        SortedSelectorNode mainSelector = new SortedSelectorNode("MainSelector");
+        enemyBehaviourTree.AddChild(mainSelector);
+
+        var patrolStrategy = new Leaf("PatrolStrategy", new PatrolStrategy(this),20);
+        
+
+        SequenceNode chaseSequence = new SequenceNode("ChaseSequnce", 10);
+
+       // var chaseCondition = new Leaf("ChaseCondition", new Condition(() => CanChase()));
+        var chaseStrategy = new Leaf("ChaseStrategy", new ChaseStrategy(this),10);
+
+        //chaseSequence.AddChild(chaseCondition);
+        chaseSequence.AddChild(chaseStrategy);
+
+        mainSelector.AddChild(chaseSequence);
+        mainSelector.AddChild(patrolStrategy);
+
+        //StartCoroutine(St());
     }
 
     /*private void Update()
@@ -70,8 +102,8 @@ public class Enemy : MonoBehaviour
 
     private void FixedUpdate()
     {
-
-        if (pathInProgress)
+        enemyBehaviourTree.Evaluate();
+        /*if (pathInProgress)
         {
             transform.position = Vector3.MoveTowards(transform.position, path[pathIndex].transform.position, Time.deltaTime * speed);
 
@@ -97,7 +129,7 @@ public class Enemy : MonoBehaviour
 
             }
 
-        }
+        }*/
     }
     public virtual void OnDamage(int damage)
     {
@@ -114,18 +146,50 @@ public class Enemy : MonoBehaviour
             
     }
 
+    public bool CanChase()
+    {
+        bool playerDetected = Physics.CheckSphere(transform.position, checkAreaRadius, playerMask);
+        if (playerDetected)
+        {
+            Debug.Log("Collided with player");
+            if (IsInLineOfSight())
+                return true;
+        }
+           
+        return false;
+            
+    }
+
+    private bool IsInLineOfSight()
+    {
+        Vector3 rayDirection = playerConyroller.centerPoint.position - transform.position;
+        Ray ray = new Ray(transform.position, rayDirection);
+        if (Physics.Raycast(ray, out RaycastHit hit, checkAreaRadius,rayMask,QueryTriggerInteraction.Ignore))
+        {
+            Debug.DrawRay(transform.position, rayDirection * checkAreaRadius,Color.red);
+            if (hit.transform.GetComponent<PlayerController>() != null)
+            {
+                Debug.Log("Player is in los");
+                return true;
+            }
+                
+        }
+           
+        return false;
+
+    }
+
     private IEnumerator St()
     {
         yield return new WaitForSeconds(7f);
         //Debug.Log("Path initted");
         path = pathFinder.DrawPath(transform.position,patrolPoints[patrolIndex].position);
-        Debug.Log("Path count:" + path.Count);
+        //Debug.Log("Path count:" + path.Count);
         pathInProgress = true;
-        foreach (var pathGrid in path)
-            Debug.Log("Path name:" + pathGrid.name);
+        /*foreach (var pathGrid in path)
+            Debug.Log("Path name:" + pathGrid.name);*/
 
     }
-
     private bool ShouldPathChange(List<PathGrid> newPath)
     {
         if (newPath == null || newPath.Count == 0 || path == null || path.Count == 0)

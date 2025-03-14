@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public abstract class ItemPart : MonoBehaviour, IInspectable
+public class ItemPart : MonoBehaviour, IInspectable
 {
     [SerializeField] protected string toSayOnInspect;
 

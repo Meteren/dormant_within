@@ -67,7 +67,7 @@ public class PathFinder : MonoBehaviour
         return foundPath;
     }
 
-    public List<PathGrid> FindPath(Vector3 startPosition, Vector3 positionToMove)
+    private List<PathGrid> FindPath(Vector3 startPosition, Vector3 positionToMove)
     {
         List<PathGrid> gridList = extractedGridList;
         PathGrid startGrid = GetClosestGridToPosition(startPosition);

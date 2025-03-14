@@ -1,6 +1,8 @@
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -29,6 +31,7 @@ public class PlayerController : MonoBehaviour
     public bool shoot;
     public bool isPressingM2;
     public bool comeFromShooting;
+    public bool turnBack;
 
     [Header("Reference Point")]
     [SerializeField] private Transform reference;
@@ -44,9 +47,16 @@ public class PlayerController : MonoBehaviour
 
     [Header("Locked Enemy")]
     public Enemy lockedEnemy;
+
+    [Header("Center Point")]
+    public Transform centerPoint;
     public Vector3 ForwardDirection {  get; private set; }
 
     StateMachine playerStateMachine = new StateMachine();
+
+    public Quaternion targetRotation;
+
+    float rotationSpeed = 500f;
     void Start()
     {
         GameManager.instance.blackboard.SetValue("PlayerController", this);
@@ -60,6 +70,7 @@ public class PlayerController : MonoBehaviour
         var walkBackwardsState = new WalkBackwardsState(this);
         var aimState = new AimState(this);
         var shootState = new ShootState(this);
+        var turnBackState = new TurnBackState(this);
 
         baseState = idleState;
 
@@ -71,6 +82,9 @@ public class PlayerController : MonoBehaviour
         Add(runState, walkState, new FuncPredicate(() => walk));
         Add(runState, idleState, new FuncPredicate(() => idle));
         Add(walkBackwardsState, idleState, new FuncPredicate(() => idle));
+        Add(walkBackwardsState, turnBackState, new FuncPredicate(() => turnBack));
+        Add(turnBackState, idleState, new FuncPredicate(() => !turnBack));
+        Add(idleState, turnBackState, new FuncPredicate(() => turnBack));
 
         Any(aimState, new FuncPredicate(() => aim));
 
@@ -94,11 +108,22 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!turnBack)
+        {
+            Vector3 backDirection = -1 * ForwardDirection;
+            backDirection.y = 0;
+            targetRotation = Quaternion.LookRotation(backDirection);
+        }   
         SetForwardDirection();
-        Rotate();
+        if (turnBack)
+        {
+            TurnBack();
+            if (CheckIfRotationHandled())
+                turnBack = false;
+        }
+        Rotate();  
 
     }
-
     void Update()
     {
         if (Input.GetMouseButtonUp(1))
@@ -166,11 +191,29 @@ public class PlayerController : MonoBehaviour
     private void OnDisable()
     {
         ResetState();
+        enemiesInRange.Clear();
     }
 
+    private void TurnBack()
+    {
+        transform.rotation =
+            Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+    }
+
+    private bool CheckIfRotationHandled()
+    {
+        float angle = Quaternion.Angle(transform.rotation, targetRotation);
+        if (angle < 5f)
+        {
+            transform.rotation = targetRotation;
+            return true;
+        }
+        else return false;
+    }
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(transform.position, aimRadius);
     }
 
+    
 }

@@ -17,7 +17,6 @@ public class Spot : MonoBehaviour
         cam = GetComponentInChildren<CinemachineVirtualCamera>();
     }
 
-  
     private void Update()
     {
        
@@ -38,34 +37,10 @@ public class Spot : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer("Player"))
         {
             cam.Priority = 0;            
-            ResetCam();
+            //ResetCam();
 
         }
             
-    }
-
-    //can be deleted later
-    private void CheckAndRotateIfNeeded(Vector3 deltaPos)
-    {
-        Vector3 rotationDegrees = cam.transform.eulerAngles;
-
-        if (CalculateDistanceToRotate() < lookAtDistanceToCam)
-        {
-            Debug.Log("Calculating");
-            Vector2 xzFlat = new Vector2(deltaPos.x, deltaPos.z);
-            float rotationDirection = Mathf.Sign(Vector3.Dot(cam.transform.forward, deltaPos)); 
-
-            rotationDegrees.x += -1 * rotationDirection * xzFlat.magnitude * rotationSpeed * Time.deltaTime;
-        }
-
-        cam.transform.rotation = Quaternion.Euler(rotationDegrees);
-    }
-
-    //including this 
-    private float CalculateDistanceToRotate()
-    {
-        float distance = Vector3.Distance(lookAt.transform.position, cam.transform.position);
-        return distance;
     }
 
     private void ResetCam()

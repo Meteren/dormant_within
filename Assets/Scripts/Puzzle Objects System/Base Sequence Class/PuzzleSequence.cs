@@ -23,6 +23,7 @@ public class PuzzleSequence : MonoBehaviour, IInteractable
     public bool sequenceCanBeActivated = false;
     public bool onInpsect = false;
     public bool sequenceResolved = false;
+    public bool puzzleSolved;
    
     protected Vector3 originalPlayerPosition = Vector3.zero;
     protected CinemachineVirtualCamera activeCamBeforeSequenceCam;

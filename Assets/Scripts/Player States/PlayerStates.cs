@@ -1,7 +1,5 @@
 
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 public class IdleState : BasePlayerState
 {
@@ -27,13 +25,15 @@ public class IdleState : BasePlayerState
 
         base.Update();
         Debug.Log("Idle");
-        
+
         if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.LeftShift))
             playerController.run = true;
         else if (Input.GetKey(KeyCode.W))
             playerController.walk = true;
-        else if(Input.GetKey(KeyCode.S))
+        else if (Input.GetKey(KeyCode.S))
             playerController.walkBackwards = true;
+        else if (Input.GetKeyDown(KeyCode.C))
+            playerController.turnBack = true;
 
     }
 }
@@ -94,6 +94,8 @@ public class WalkBackwardsState : BasePlayerState
         Debug.Log("WalkBackwards");
         if (Input.GetKeyUp(KeyCode.S))
             playerController.idle = true;
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+            playerController.turnBack = true;
         playerController.rb.velocity = new Vector3(playerController.ForwardDirection.x * backwardsSpeed * -1,
             playerController.rb.velocity.y, playerController.ForwardDirection.z * backwardsSpeed * -1);
     }
@@ -127,6 +129,32 @@ public class RunState : BasePlayerState
         playerController.rb.velocity = new Vector3(playerController.ForwardDirection.x * runSpeed,
               playerController.rb.velocity.y, playerController.ForwardDirection.z * runSpeed);
     }
+}
+
+public class TurnBackState : BasePlayerState
+{
+    public TurnBackState(PlayerController playerController) : base(playerController)
+    {
+    }
+    public override void OnStart()
+    {
+        base.OnStart();
+        Debug.Log("TurnBackState start initted");
+        playerController.idle = true;
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+    }
+
+    public override void Update()
+    {
+
+        Debug.Log("Turn Back");
+       
+    }
+
 }
 
 public class AimState : BasePlayerState
@@ -213,7 +241,6 @@ public class ShootState : BasePlayerState
     public ShootState(PlayerController playerController) : base(playerController)
     {
     }
- 
     public override void OnStart()
     {
         base.OnStart();

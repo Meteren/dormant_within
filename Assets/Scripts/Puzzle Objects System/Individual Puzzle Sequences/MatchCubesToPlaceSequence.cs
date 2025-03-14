@@ -25,6 +25,11 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
 
     private GridManager gridManager;
 
+    [Header("MovePlace")]
+    [SerializeField] private Transform movePlace;
+
+    float slideSpeed = 7f;
+
     private void Start()
     {     
         gridManager = GetComponent<GridManager>();
@@ -32,6 +37,7 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
     }
     private void Update()
     {
+      
         if (onInpsect && Input.GetKeyDown(KeyCode.Q))
         {
             SequenceCamHandler(0);
@@ -42,9 +48,9 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
 
         if (sequenceResolved)
         {
-           OnSequenceResolved();
-        }
-            
+            OnSequenceResolved();
+        }     
+        
     }
     public override void TryInit(List<object> itemEntries, List<KeyItem> requiredItems)
     {
@@ -84,8 +90,15 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
     public override void OnSequenceResolved()
     {
         SequenceCamHandler(0);
-        Destroy(transform.parent.gameObject);
-        Debug.Log("Puzzle Solved");
+        onInpsect = false;
+        sequenceCanBeActivated = false;
+        gridManager.ResetGrid();
+        transform.parent.position = Vector3.MoveTowards(transform.parent.position, movePlace.position, Time.deltaTime * slideSpeed);
+        if (!puzzleSolved)
+            return;
+        UIManager.instance.HandleIndicator("Puzzle Solved",2f);
+        puzzleSolved = true;
+
     }
 
     public override void OnInteract()
@@ -160,7 +173,7 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
     private void OnDisable()
     {
         playerController.interactedPuzzleObject = null;
-    }
 
+    }
 
 }

@@ -13,7 +13,7 @@ public class LockedObject : PuzzleObject, IInteractable
             return;
         }
         UIManager.instance.HandleInventory(false);
-        UIManager.instance.HandleIndicator("Object unlocked the door.", 2f);
+        UIManager.instance.HandleIndicator("Item unlocked the door.", 2f);
         DeleteRepresenter(representer);
         isItUnlocked = true;
     }
@@ -25,7 +25,7 @@ public class LockedObject : PuzzleObject, IInteractable
         else
         {
             Debug.Log("Door opened and passed to the new area.");
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }
             
     }
