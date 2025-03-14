@@ -6,19 +6,18 @@
 
     public override NodeStatus Evaluate()
     {
-        for(int i = 0; i < children.Count; i++)
+        
+        switch (children[childIndex].Evaluate())
         {
-            switch (children[childIndex].Evaluate())
-            {
-                case NodeStatus.FAILURE:
-                    ResetChildIndex();
-                    return NodeStatus.FAILURE;
-                case NodeStatus.SUCCESS:
-                    return NodeStatus.SUCCESS;
-                case NodeStatus.RUNNING:
-                    return NodeStatus.RUNNING;
-            }
+            case NodeStatus.FAILURE:
+                ResetChildIndex();
+                return NodeStatus.FAILURE;
+            case NodeStatus.SUCCESS:
+                return NodeStatus.SUCCESS;
+            case NodeStatus.RUNNING:
+                return NodeStatus.RUNNING;
         }
+        
         return NodeStatus.DEFAULT;
     }
 }

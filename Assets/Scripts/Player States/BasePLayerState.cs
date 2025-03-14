@@ -34,12 +34,22 @@ public class BasePlayerState : IState
 
     protected void AimAtClosest()
     {
-        if(playerController.lockedEnemy.isDead || !playerController.enemiesInRange.Contains(playerController.lockedEnemy))
+        Debug.Log("Enemies in range count:" + playerController.enemiesInRange.Count);
+        if(!playerController.enemiesInRange.Contains(playerController.lockedEnemy))
         {
             playerController.lockedEnemy = GetClosestEnemy();
             lockOn = false;
         }
-          
+
+        if (playerController.lockedEnemy == null)
+            return;
+
+        if (playerController.lockedEnemy.isDead)
+        {
+            playerController.lockedEnemy = GetClosestEnemy();
+            lockOn = false;
+        }
+                 
         Weapon weapon = playerController.equippedItem as Weapon;
         Vector3 direction = playerController.lockedEnemy.transform.position - weapon.muzzlePoint.position;
 
@@ -73,9 +83,26 @@ public class BasePlayerState : IState
     }
     protected Enemy GetClosestEnemy()
     {
-        Enemy closestEnemy = playerController.enemiesInRange.Aggregate((closest, next)
-            => next.CalculatePriority(playerController) < closest.CalculatePriority(playerController) ? next : closest);
+        playerController.enemiesInRange.Sort((x, y) =>
+        x.CalculatePriority(playerController).CompareTo(y.CalculatePriority(playerController)));
+        Enemy closestEnemy = null;
+        foreach(var enemy in playerController.enemiesInRange)
+        {
+            Vector3 direction = enemy.transform.position - playerController.centerPoint.position;
+            Ray ray = new Ray(playerController.centerPoint.position, direction);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, playerController.aimRadius, playerController.aimMask, QueryTriggerInteraction.Ignore))
+            {
+                Debug.DrawRay(playerController.transform.position, direction * playerController.aimRadius);
+                if (hit.transform.GetComponent<Enemy>() == enemy)
+                    closestEnemy = enemy;
+                else
+                    continue;
+            }
+
+        }
         return closestEnemy;
+
     }
 
 }

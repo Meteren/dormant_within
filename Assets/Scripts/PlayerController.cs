@@ -50,6 +50,9 @@ public class PlayerController : MonoBehaviour
 
     [Header("Center Point")]
     public Transform centerPoint;
+
+    [Header("Aim Mask")]
+    public LayerMask aimMask;
     public Vector3 ForwardDirection {  get; private set; }
 
     StateMachine playerStateMachine = new StateMachine();

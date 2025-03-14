@@ -14,20 +14,18 @@ class SortedSelectorNode : SelectorNode
         if (childIndex >= sortedChildren.Count)
             ResetChildIndex();
 
-        for (int i = 0; i < children.Count; i++)
+        switch (sortedChildren[childIndex].Evaluate())
         {
-            switch (sortedChildren[childIndex].Evaluate())
-            {
-                case NodeStatus.FAILURE:
-                    childIndex++;
-                    return childIndex < children.Count ? NodeStatus.RUNNING : NodeStatus.FAILURE;
-                case NodeStatus.SUCCESS:
-                    ResetChildIndex();
-                    return NodeStatus.SUCCESS;
-                case NodeStatus.RUNNING:
-                    return NodeStatus.RUNNING;
-            }
+            case NodeStatus.FAILURE:
+                childIndex++;
+                return childIndex < children.Count ? NodeStatus.RUNNING : NodeStatus.FAILURE;
+            case NodeStatus.SUCCESS:
+                ResetChildIndex();
+                return NodeStatus.SUCCESS;
+            case NodeStatus.RUNNING:
+                 return NodeStatus.RUNNING;
         }
+      
         return NodeStatus.DEFAULT; ;
     }
 }

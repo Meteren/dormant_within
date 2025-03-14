@@ -9,20 +9,19 @@
         if(childIndex >= children.Count)
             ResetChildIndex();
 
-        for (int i = 0; i < children.Count; i++)
+        
+        switch (children[childIndex].Evaluate())
         {
-            switch (children[childIndex].Evaluate())
-            {
-                case NodeStatus.FAILURE:
-                    ResetChildIndex();
-                    return NodeStatus.FAILURE;
-                case NodeStatus.SUCCESS:
-                    childIndex++;
-                    return childIndex >= children.Count ? NodeStatus.SUCCESS : NodeStatus.RUNNING;
-                case NodeStatus.RUNNING:
-                    return NodeStatus.RUNNING;
-            }
+            case NodeStatus.FAILURE:
+                ResetChildIndex();
+                return NodeStatus.FAILURE;
+            case NodeStatus.SUCCESS:
+                childIndex++;
+                return childIndex >= children.Count ? NodeStatus.SUCCESS : NodeStatus.RUNNING;
+            case NodeStatus.RUNNING:
+                return NodeStatus.RUNNING;
         }
+        
         return NodeStatus.DEFAULT;
     }
 }
