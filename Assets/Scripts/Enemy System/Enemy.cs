@@ -39,6 +39,10 @@ public class Enemy : MonoBehaviour
 
     [Header("Conditions")]
     public bool isDead;
+
+    [Header("Last Seen Position")]
+    public Vector3 lastSeenPos;
+
     private void Start()
     {
         playerMask = LayerMask.GetMask("Player");
@@ -55,14 +59,17 @@ public class Enemy : MonoBehaviour
 
         SequenceNode chaseSequence = new SequenceNode("ChaseSequnce", 10);
 
-       // var chaseCondition = new Leaf("ChaseCondition", new Condition(() => CanChase()));
+        var chaseCondition = new Leaf("ChaseCondition", new Condition(() => CanChase()));
         var chaseStrategy = new Leaf("ChaseStrategy", new ChaseStrategy(this),10);
+        var moveToLastSeenPosStrategy = new Leaf("MoveToLastSeenPos", new MoveToLastSeenPositionStrategy(this));
 
-        //chaseSequence.AddChild(chaseCondition);
+        chaseSequence.AddChild(chaseCondition);
         chaseSequence.AddChild(chaseStrategy);
+        chaseSequence.AddChild(moveToLastSeenPosStrategy);
 
         mainSelector.AddChild(chaseSequence);
         mainSelector.AddChild(patrolStrategy);
+
 
         //StartCoroutine(St());
     }

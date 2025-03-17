@@ -7,6 +7,7 @@ public class BaseEnemy
     //later will be changed with spesific enemy types
     protected Enemy enemy;
     protected List<PathGrid> path;
+    protected bool initPlayerPath;
     protected PlayerController playerController => 
         GameManager.instance.blackboard.TryGetValue("PlayerController", 
             out PlayerController _playerController) ? _playerController : null;
@@ -80,22 +81,25 @@ public class ChaseStrategy : BaseEnemy, IStrategy
 {
 
     float chaseSpeed = 1.7f;
-    bool initPlayerPath;
+
     public ChaseStrategy(Enemy enemy) : base(enemy)
     {
     }
     public Node.NodeStatus Evaluate()
     {
-        Debug.Log("ChseStrategy");
+        Debug.Log("ChaseStrategy");
         if (!initPlayerPath)
         {
             path = enemy.pathFinder.DrawPath(enemy.transform.position, playerController.transform.position);
+            
             initPlayerPath = true;
         }
         if (!enemy.CanChase())
         {
             initPlayerPath = false;
-            return Node.NodeStatus.FAILURE;    
+            enemy.lastSeenPos = path[path.Count - 1].transform.position;
+            Debug.Log($"Last seen pos: Y:{path[path.Count - 1].Y} - X:{path[path.Count - 1].X}");
+            return Node.NodeStatus.SUCCESS;    
         }
             
         if (initPlayerPath)
@@ -114,4 +118,61 @@ public class ChaseStrategy : BaseEnemy, IStrategy
     }
 
 
+}
+
+public class MoveToLastSeenPositionStrategy : BaseEnemy, IStrategy
+{
+    float moveSpeed = 1.7f;
+    public MoveToLastSeenPositionStrategy(Enemy enemy) : base(enemy)
+    {
+    }
+
+    public Node.NodeStatus Evaluate()
+    {
+        Debug.Log("MoveToLastSeen Strategy");
+
+        if (!initPlayerPath)
+        {
+            path = enemy.pathFinder.DrawPath(enemy.transform.position, enemy.lastSeenPos);
+            foreach (var pathgrid in path)
+            {
+                Debug.Log($"Y:{pathgrid.Y}--X:{pathgrid.X}");
+            }
+            initPlayerPath = true;
+        }
+        
+        if (enemy.CanChase())
+        {
+            initPlayerPath = false;
+            return Node.NodeStatus.SUCCESS;
+        }
+
+        enemy.transform.position = Vector3.MoveTowards(enemy.transform.position, path[0].transform.position, Time.deltaTime * moveSpeed);
+
+        if (Vector3.Distance(enemy.transform.position, path[0].transform.position) <= 0.05f)
+        {
+            path = enemy.pathFinder.DrawPath(enemy.transform.position,enemy.lastSeenPos);
+        }
+
+        if (Vector3.Distance(enemy.transform.position, enemy.lastSeenPos) <= 0.05f)
+        {
+            initPlayerPath = false;
+            return Node.NodeStatus.SUCCESS;
+        }
+
+        return Node.NodeStatus.RUNNING;
+        
+    }
+}
+
+public class AttackStrategy : BaseEnemy, IStrategy
+{
+    public AttackStrategy(Enemy enemy) : base(enemy)
+    {
+    }
+
+    public Node.NodeStatus Evaluate()
+    {
+        throw new System.NotImplementedException();
+    }
 }

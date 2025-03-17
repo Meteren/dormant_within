@@ -10514,7 +10514,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bf5fcef709b3e2f48b40ea23e1043c19, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 13.03
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bf5fcef709b3e2f48b40ea23e1043c19, type: 3}
       propertyPath: m_LocalPosition.y
@@ -10522,7 +10522,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bf5fcef709b3e2f48b40ea23e1043c19, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -20.51
+      value: -11.43
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bf5fcef709b3e2f48b40ea23e1043c19, type: 3}
       propertyPath: m_LocalRotation.w
@@ -13720,6 +13720,9 @@ MonoBehaviour:
   enemiesInRange: []
   lockedEnemy: {fileID: 0}
   centerPoint: {fileID: 504165538}
+  aimMask:
+    serializedVersion: 2
+    m_Bits: 1303
   targetRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!136 &1936827781
 CapsuleCollider:
