@@ -1,8 +1,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -32,6 +30,8 @@ public class PlayerController : MonoBehaviour
     public bool isPressingM2;
     public bool comeFromShooting;
     public bool turnBack;
+    public bool isDead;
+    public bool isInjured;
 
     [Header("Reference Point")]
     [SerializeField] private Transform reference;
@@ -53,6 +53,11 @@ public class PlayerController : MonoBehaviour
 
     [Header("Aim Mask")]
     public LayerMask aimMask;
+
+    [Header("Health Segment")]
+    public HealthBar healthBar;
+    public float maxHealth = 100;
+    public float currentHealth;
     public Vector3 ForwardDirection {  get; private set; }
 
     StateMachine playerStateMachine = new StateMachine();
@@ -60,12 +65,17 @@ public class PlayerController : MonoBehaviour
     public Quaternion targetRotation;
 
     float rotationSpeed = 500f;
+
     void Start()
     {
+
         GameManager.instance.blackboard.SetValue("PlayerController", this);
 
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
+
+        currentHealth = maxHealth;
+        healthBar.SetHealth(currentHealth, ShouldFlicker);
 
         var idleState = new IdleState(this);
         var walkState = new WalkState(this);
@@ -134,6 +144,11 @@ public class PlayerController : MonoBehaviour
         SetRotationDirection();
         UpdateAnimations();
         playerStateMachine.Update();
+        if (Input.GetKeyDown(KeyCode.V))
+            OnTakeDamage(20f);
+        if (Input.GetKeyDown(KeyCode.H))
+            OnHeal(20);
+
 
     }
 
@@ -202,7 +217,6 @@ public class PlayerController : MonoBehaviour
         transform.rotation =
             Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
     }
-
     private bool CheckIfRotationHandled()
     {
         float angle = Quaternion.Angle(transform.rotation, targetRotation);
@@ -218,5 +232,66 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, aimRadius);
     }
 
+    public void OnTakeDamage(float damageAmount)
+    {
+        if (isDead)
+            return;
+
+        currentHealth -= damageAmount;
+
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            //isDead = true; --will be used later
+        }
+
+        AdjustInjuredState();
+        
+        healthBar.SetHealth(currentHealth, ShouldFlicker);
+    }
+
+    public void OnHeal(float healAmount)
+    {
+        currentHealth += healAmount;
+        healthBar.SetHealth(currentHealth,ShouldFlicker);
+        if (currentHealth >= 100)
+        {
+            currentHealth = 100;
+        }
+        AdjustInjuredState();
+    }
+
+
+    public void AdjustInjuredState()
+    {
+        if (currentHealth <= 30f && !isInjured)
+        {
+            isInjured = true;
+            StartCoroutine(SmoothWeightTransformation(0, 1));
+        }    
+        else if (currentHealth >= 30f && isInjured)
+        {
+            isInjured = false;
+            StartCoroutine(SmoothWeightTransformation(1, 0));
+        }
+            
+    }
+
+    private IEnumerator SmoothWeightTransformation(float startPoint, float endPoint)
+    {
+        float weightValue = startPoint;
+        float duration = 2f;
+        float elapsedTime = 0;
+        while(elapsedTime <= duration)
+        {
+            elapsedTime += Time.deltaTime;
+            weightValue = Mathf.Lerp(startPoint, endPoint, elapsedTime / duration);
+            anim.SetLayerWeight(1, weightValue);
+            yield return null;
+        }
+        anim.SetLayerWeight(1, endPoint);
+    }
+
+    public bool ShouldFlicker() => currentHealth <= 30f;
     
 }
