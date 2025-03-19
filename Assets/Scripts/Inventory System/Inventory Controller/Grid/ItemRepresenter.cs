@@ -20,7 +20,7 @@ public class ItemRepresenter : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     private void Update()
     {
-        if (representedItem is Weapon weapon)
+        if (representedItem is Weapon weapon && !weapon.isMelee)
             clipText.text = $"{weapon.GetClip().currentAmount}/{weapon.GetClip().maxAmount}";
         if (representedItem is Clip clip)
             clipText.text = $"{clip.currentAmount}/{clip.maxAmount}";

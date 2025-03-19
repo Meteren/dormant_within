@@ -11,7 +11,6 @@ public class IdleState : BasePlayerState
     public override void OnStart()
     {
         base.OnStart();
-
     }
 
     public override void OnExit()
@@ -26,7 +25,7 @@ public class IdleState : BasePlayerState
         base.Update();
         Debug.Log("Idle");
 
-        if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.LeftShift) && !playerController.getStance)
             playerController.run = true;
         else if (Input.GetKey(KeyCode.W))
             playerController.walk = true;
@@ -64,7 +63,7 @@ public class WalkState : BasePlayerState
         Debug.Log("Walk");
         if(Input.GetKeyUp(KeyCode.W))
             playerController.idle = true;
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !playerController.getStance)
             playerController.run = true;
 
         playerController.rb.velocity = new Vector3(playerController.ForwardDirection.x * walkSpeed,
@@ -195,6 +194,9 @@ public class AimState : BasePlayerState
 
     public override void Update()
     {
+        if (Input.GetKeyDown(KeyCode.V))
+            playerController.kick = true;
+
         if (!enemySpotted)
         {
             if(playerController.enemiesInRange.Count > 0)
@@ -231,7 +233,8 @@ public class AimState : BasePlayerState
     private IEnumerator WaitTransition()
     {
         yield return new WaitForSeconds(transitionDuration);
-        playerController.idle = true;
+        if(!playerController.kick)
+            playerController.idle = true;
     }
 }
 
@@ -282,6 +285,43 @@ public class ShootState : BasePlayerState
         else
             Debug.Log("Missed");
        
+    }
+}
+
+public class KickState : BasePlayerState
+{
+    AnimatorStateInfo stateInfo;
+    public KickState(PlayerController playerController) : base(playerController)
+    {
+    }
+    public override void OnStart()
+    {
+        base.OnStart();
+        playerController.canRotate = false;
+    }
+    public override void OnExit()
+    {
+        base.OnExit();
+        playerController.kick = false;
+        playerController.canRotate = true;
+    }
+
+    public override void Update()
+    {
+        // base.Update();
+        Debug.Log("Kick state");
+        stateInfo = playerController.anim.GetCurrentAnimatorStateInfo(0);
+
+        if (playerController.anim.IsInTransition(0)) return;
+
+        if (stateInfo.IsName("kick"))
+            if (stateInfo.normalizedTime >= 1)
+            {
+                Debug.Log("Exited");
+                playerController.idle = true;
+            }
+                
+
     }
 }
 

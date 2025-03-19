@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     {
         left, right,none
     }
+
     RotationDirection direction = RotationDirection.none;
     public Animator anim;
     public Rigidbody rb;
@@ -32,6 +33,10 @@ public class PlayerController : MonoBehaviour
     public bool turnBack;
     public bool isDead;
     public bool isInjured;
+    public bool getStance;
+    public bool meleeAttack;
+    public bool kick;
+    public bool canRotate;
 
     [Header("Reference Point")]
     [SerializeField] private Transform reference;
@@ -84,6 +89,7 @@ public class PlayerController : MonoBehaviour
         var aimState = new AimState(this);
         var shootState = new ShootState(this);
         var turnBackState = new TurnBackState(this);
+        var kickState = new KickState(this);
 
         baseState = idleState;
 
@@ -99,8 +105,10 @@ public class PlayerController : MonoBehaviour
         Add(turnBackState, idleState, new FuncPredicate(() => !turnBack));
         Add(idleState, turnBackState, new FuncPredicate(() => turnBack));
 
-        Any(aimState, new FuncPredicate(() => aim));
+        Any(aimState, new FuncPredicate(() => aim && !kick));
+        Any(kickState, new FuncPredicate(() => kick));
 
+        Add(kickState, idleState, new FuncPredicate(() => idle));
         Add(aimState, shootState, new FuncPredicate(() => shoot));
         Add(aimState, idleState, new FuncPredicate(() => idle));
         Add(shootState, aimState, new FuncPredicate(() => aim));
@@ -134,21 +142,22 @@ public class PlayerController : MonoBehaviour
             if (CheckIfRotationHandled())
                 turnBack = false;
         }
-        Rotate();  
+        if(canRotate)
+            Rotate();  
 
     }
     void Update()
     {
+        Debug.Log("Pressing m2:" + isPressingM2);
         if (Input.GetMouseButtonUp(1))
             isPressingM2 = false;
         SetRotationDirection();
         UpdateAnimations();
         playerStateMachine.Update();
-        if (Input.GetKeyDown(KeyCode.V))
+        if (Input.GetKeyDown(KeyCode.B))
             OnTakeDamage(20f);
         if (Input.GetKeyDown(KeyCode.H))
             OnHeal(20);
-
 
     }
 
@@ -170,6 +179,9 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("run", run);
         anim.SetBool("aim", aim);
         anim.SetBool("shoot", shoot);
+        anim.SetBool("getStance", getStance);
+        anim.SetBool("meleeAttack", meleeAttack);
+        anim.SetBool("kick", kick);
     }
 
     public void SetForwardDirection()
@@ -286,12 +298,14 @@ public class PlayerController : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             weightValue = Mathf.Lerp(startPoint, endPoint, elapsedTime / duration);
-            anim.SetLayerWeight(1, weightValue);
+            anim.SetLayerWeight(3, weightValue);
             yield return null;
         }
-        anim.SetLayerWeight(1, endPoint);
+        anim.SetLayerWeight(3, endPoint);
     }
 
     public bool ShouldFlicker() => currentHealth <= 30f;
+
+    public void SetMeleeAttack() => meleeAttack = false;
     
 }

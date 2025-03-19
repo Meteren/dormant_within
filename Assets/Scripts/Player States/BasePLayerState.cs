@@ -1,8 +1,5 @@
 ﻿
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-
 public class BasePlayerState : IState
 {
     protected PlayerController playerController;
@@ -25,11 +22,40 @@ public class BasePlayerState : IState
 
     public virtual void Update()
     {
-        if (Input.GetMouseButtonDown(1) && playerController.equippedItem != null && !UIManager.instance.inventory.activeSelf)
+        if (Input.GetMouseButton(1) && playerController.equippedItem != null && !UIManager.instance.inventory.activeSelf)
         {
-            playerController.aim = true;
+            Weapon weapon = playerController.equippedItem as Weapon;
+            if (weapon.isMelee)
+            {
+                if (!playerController.getStance)
+                {
+                    playerController.getStance = true;
+                    playerController.idle = true;
+                }
+               
+            }
+            else
+            {
+                playerController.aim = true;
+                
+            }
             playerController.isPressingM2 = true;
+
         }
+
+        if (playerController.getStance)
+        {
+            if (Input.GetMouseButtonDown(0))
+                playerController.meleeAttack = true;
+         
+        }          
+
+        if (Input.GetMouseButtonUp(1) || !playerController.isPressingM2)
+            playerController.getStance = false;
+
+        if(Input.GetKeyDown(KeyCode.V) && !playerController.shoot && !playerController.meleeAttack)
+            playerController.kick = true;
+
     }
 
     protected void AimAtClosest()

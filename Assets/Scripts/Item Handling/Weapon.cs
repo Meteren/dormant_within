@@ -11,13 +11,16 @@ public class Weapon : Item, IEquippable, ICombinable
     public Transform muzzlePoint;
 
     [Header("Range")]
-    [SerializeField] private float weapontRange;
+    [SerializeField] private float weaponRange;
 
     [Header("Clip")]
     [SerializeField] private Clip clip;
 
     [Header("Layer To Hit")]
     [SerializeField] private LayerMask hitMask;
+
+    [Header("Type")]
+    public bool isMelee;
     protected new void Start()
     {
         base.Start();
@@ -76,11 +79,11 @@ public class Weapon : Item, IEquippable, ICombinable
     {
         Debug.Log("Shoot");
         Ray ray = new Ray(muzzlePoint.position, muzzlePoint.forward);
-        if (Physics.Raycast(ray, out RaycastHit hit, weapontRange,hitMask))
-            Debug.DrawRay(muzzlePoint.position, muzzlePoint.forward * weapontRange, Color.red, 1f);
+        if (Physics.Raycast(ray, out RaycastHit hit, weaponRange,hitMask))
+            Debug.DrawRay(muzzlePoint.position, muzzlePoint.forward * weaponRange, Color.red, 1f);
         else
         {
-            Debug.DrawRay(muzzlePoint.position, muzzlePoint.forward * weapontRange, Color.green, 1f);
+            Debug.DrawRay(muzzlePoint.position, muzzlePoint.forward * weaponRange, Color.green, 1f);
             hit = default;
         }      
         clip.DecreaseAmount(1);
