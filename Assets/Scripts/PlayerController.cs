@@ -34,9 +34,14 @@ public class PlayerController : MonoBehaviour
     public bool isDead;
     public bool isInjured;
     public bool getStance;
-    public bool meleeAttack;
+    public bool primaryAttack;
+    public bool secondaryAttack;
     public bool kick;
     public bool canRotate;
+    public bool readyToCombo;
+    public bool charge;
+    public bool chargeAttack;
+
 
     [Header("Reference Point")]
     [SerializeField] private Transform reference;
@@ -180,8 +185,11 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("aim", aim);
         anim.SetBool("shoot", shoot);
         anim.SetBool("getStance", getStance);
-        anim.SetBool("meleeAttack", meleeAttack);
+        anim.SetBool("primaryAttack", primaryAttack);
+        anim.SetBool("secondaryAttack", secondaryAttack);
         anim.SetBool("kick", kick);
+        anim.SetBool("charge", charge);
+        anim.SetBool("chargeAttack", chargeAttack);
     }
 
     public void SetForwardDirection()
@@ -306,6 +314,24 @@ public class PlayerController : MonoBehaviour
 
     public bool ShouldFlicker() => currentHealth <= 30f;
 
-    public void SetMeleeAttack() => meleeAttack = false;
+    public void ReadyFortSecondaryMeleeAttack() => StartCoroutine(ComboFrame());
+
+    public void SetSecondaryMeleeAttack() => secondaryAttack = false;
+
+    public void SetChargedAttack() => chargeAttack = false; 
+
+    public void HandleChargeAtTheEndIfNeeded()
+    {
+        if (!getStance)
+            chargeAttack = true;
+    }
+       
+    private IEnumerator ComboFrame()
+    {
+        readyToCombo = true;
+        yield return new WaitForSeconds(0.3f);
+        readyToCombo = false;
+        primaryAttack = false;
+    }
     
 }

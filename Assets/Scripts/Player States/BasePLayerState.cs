@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using UnityEngine;
 public class BasePlayerState : IState
 {
@@ -46,15 +47,51 @@ public class BasePlayerState : IState
         if (playerController.getStance)
         {
             if (Input.GetMouseButtonDown(0))
-                playerController.meleeAttack = true;
-         
+            {
+                if (!playerController.primaryAttack && !playerController.secondaryAttack)
+                    playerController.StartCoroutine(TryCharge());
+                if (playerController.readyToCombo)
+                    playerController.secondaryAttack = true;
+            }
+
+            if(Input.GetMouseButtonUp(0) && playerController.charge)
+            {
+                playerController.chargeAttack = true;
+                playerController.charge = false;
+            }
+                
+
         }          
 
         if (Input.GetMouseButtonUp(1) || !playerController.isPressingM2)
+        {
             playerController.getStance = false;
+            playerController.StopCoroutine(TryCharge());
+            if (playerController.charge)
+            {
+                playerController.chargeAttack = true;
+                playerController.charge = false;
+            }
+                
+        }
+            
 
-        if(Input.GetKeyDown(KeyCode.V) && !playerController.shoot && !playerController.meleeAttack)
+        if(Input.GetKeyDown(KeyCode.V) && !playerController.shoot && !playerController.primaryAttack && 
+            !playerController.secondaryAttack && !playerController.charge && !playerController.chargeAttack)
             playerController.kick = true;
+
+
+
+    }
+
+    private IEnumerator TryCharge()
+    {
+        yield return new WaitForSeconds(0.12f);
+
+        if (Input.GetMouseButton(0))
+            playerController.charge = true;
+        else
+            playerController.primaryAttack = true;
 
     }
 
@@ -130,5 +167,7 @@ public class BasePlayerState : IState
         return closestEnemy;
 
     }
+
+  
 
 }

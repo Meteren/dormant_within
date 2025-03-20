@@ -25,7 +25,8 @@ public class IdleState : BasePlayerState
         base.Update();
         Debug.Log("Idle");
 
-        if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.LeftShift) && !playerController.getStance)
+        if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.LeftShift) && 
+            !playerController.getStance && !playerController.primaryAttack && !playerController.secondaryAttack)
             playerController.run = true;
         else if (Input.GetKey(KeyCode.W))
             playerController.walk = true;
@@ -63,7 +64,7 @@ public class WalkState : BasePlayerState
         Debug.Log("Walk");
         if(Input.GetKeyUp(KeyCode.W))
             playerController.idle = true;
-        if (Input.GetKeyDown(KeyCode.LeftShift) && !playerController.getStance)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !playerController.getStance && !playerController.primaryAttack && !playerController.secondaryAttack)
             playerController.run = true;
 
         playerController.rb.velocity = new Vector3(playerController.ForwardDirection.x * walkSpeed,
