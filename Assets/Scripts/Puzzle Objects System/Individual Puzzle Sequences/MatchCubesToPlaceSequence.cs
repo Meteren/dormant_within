@@ -29,7 +29,6 @@ public class MatchCubesToPlaceSequence : PuzzleSequence
     [SerializeField] private Transform movePlace;
 
     float slideSpeed = 7f;
-
     private void Start()
     {     
         gridManager = GetComponent<GridManager>();
