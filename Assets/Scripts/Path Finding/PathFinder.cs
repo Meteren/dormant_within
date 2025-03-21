@@ -36,7 +36,8 @@ public class PathFinder : MonoBehaviour
         gridLenght = radius * 2 + 1;
         pathGrids = new PathGrid[gridLenght, gridLenght];
         Vector3 agentPosition = transform.position;
-        Vector2 bottomSize = new Vector2(reference.size.x, reference.size.z);
+        Debug.Log("Agent pos:" + agentPosition);
+        Vector2 bottomSize = new Vector2(reference.size.x * transform.lossyScale.x, reference.size.z * transform.lossyScale.z);
         Debug.Log($"Size x: {bottomSize.x} - Size y: {bottomSize.y}");
         Vector3 startPosition = new Vector3(agentPosition.x - 
             (bottomSize.x * radius), agentPosition.y, agentPosition.z + (bottomSize.y * radius));

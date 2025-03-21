@@ -4069,7 +4069,7 @@ MonoBehaviour:
   cameraFOVLookingAtObject: 0
   positionName: Pistol Position
   muzzlePoint: {fileID: 1771391003}
-  weaponRange: 0
+  weaponRange: 50
   clip: {fileID: 38933962}
   hitMask:
     serializedVersion: 2
@@ -8783,7 +8783,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1335783631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8791,7 +8791,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1335783630}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
   m_Name: 
@@ -8858,7 +8858,7 @@ MonoBehaviour:
   healthAmount: 10
   pathFinder: {fileID: 0}
   gridRadius: 26
-  checkAreaRadius: 7
+  checkAreaRadius: 10
   patrolPoints:
   - {fileID: 212668963}
   - {fileID: 1437297710}
@@ -8972,7 +8972,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b29eae9a257c1641bd5b7bdb3975286, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radius: 7
+  radius: 10
 --- !u!1 &1338956389
 GameObject:
   m_ObjectHideFlags: 0
@@ -14404,9 +14404,13 @@ MonoBehaviour:
   isDead: 0
   isInjured: 0
   getStance: 0
-  meleeAttack: 0
+  primaryAttack: 0
+  secondaryAttack: 0
   kick: 0
   canRotate: 1
+  readyToCombo: 0
+  charge: 0
+  chargeAttack: 0
   reference: {fileID: 1358042803}
   aimRadius: 7
   enemiesInRange: []

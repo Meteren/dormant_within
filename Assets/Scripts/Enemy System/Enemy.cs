@@ -25,6 +25,9 @@ public class Enemy : MonoBehaviour
     [Header("Ray Mask")]
     [SerializeField] private LayerMask rayMask;
 
+    [Header("Center")]
+    public Transform centerPoint;
+
     bool pathInProgress;
 
     int patrolIndex;
@@ -38,13 +41,18 @@ public class Enemy : MonoBehaviour
     float yOffset = 5f;
 
     [Header("Conditions")]
+    public bool walk;
+    public bool run;
+    public bool idle;
     public bool isDead;
 
     [Header("Last Seen Position")]
     public Vector3 lastSeenPos;
 
+    protected Animator enemyAnimator;
     private void Start()
     {
+        enemyAnimator = GetComponent<Animator>();
         playerMask = LayerMask.GetMask("Player");
         pathFinder = GetComponent<PathFinder>();
         pathFinder.InitPathGridTable(gridRadius);
@@ -69,7 +77,6 @@ public class Enemy : MonoBehaviour
 
         mainSelector.AddChild(chaseSequence);
         mainSelector.AddChild(patrolStrategy);
-
 
         //StartCoroutine(St());
     }
@@ -107,6 +114,11 @@ public class Enemy : MonoBehaviour
          
     }*/
 
+    private void Update()
+    {
+        SetAnimations();
+    }
+
     private void FixedUpdate()
     {
         enemyBehaviourTree.Evaluate();
@@ -137,6 +149,13 @@ public class Enemy : MonoBehaviour
             }
 
         }*/
+    }
+
+    protected void SetAnimations()
+    {
+        enemyAnimator.SetBool("idle",idle);
+        enemyAnimator.SetBool("walk", walk);
+        enemyAnimator.SetBool("run", run);
     }
     public virtual void OnDamage(int damage)
     {
