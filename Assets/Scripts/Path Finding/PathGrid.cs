@@ -83,14 +83,16 @@ public class PathGrid : MonoBehaviour, IComparable<PathGrid>
     {
       
         if (other.TryGetComponent<Renderer>(out Renderer renderer))
-            objectsOccupyingGrid.Add(renderer);
+            if(renderer != GetComponent<Renderer>() && renderer.GetComponent<Item>() == null)
+                objectsOccupyingGrid.Add(renderer);
           
     }
     private void OnTriggerExit(Collider other)
     {
        
         if (other.TryGetComponent<Renderer>(out Renderer renderer))
-            objectsOccupyingGrid.Remove(renderer);
+            if (renderer != GetComponent<Renderer>() && renderer.GetComponent<Item>() == null)
+                objectsOccupyingGrid.Remove(renderer);
     }
 
     public float CalculateDistance(Vector3 positionToMove) => Vector3.Distance(transform.position, positionToMove);

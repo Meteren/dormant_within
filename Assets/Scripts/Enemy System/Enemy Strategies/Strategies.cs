@@ -25,7 +25,6 @@ public class BaseEnemy
         Quaternion lookAt = Quaternion.LookRotation(direction);
         if (Quaternion.Angle(enemy.transform.rotation, lookAt) <= 1f)
         {
-
             enemy.transform.rotation = lookAt;
             return true;
         }      
@@ -50,12 +49,6 @@ public class PatrolStrategy : BaseEnemy, IStrategy
     public Node.NodeStatus Evaluate()
     {
         Debug.Log("PatrolStrategy");
-        if (!coroutineStarted)
-        {
-            coroutineStarted = true;
-            enemy.StartCoroutine(InitConstruction());
-        } 
-            
         if (enemy.CanChase())
         {
             initPathConstruct = false;
@@ -63,13 +56,25 @@ public class PatrolStrategy : BaseEnemy, IStrategy
             return Node.NodeStatus.SUCCESS;
         }
 
+        if (enemy.damageTaken)
+        {
+            initPlayerPath = false;
+            return Node.NodeStatus.SUCCESS;
+        }
+
+        if (!coroutineStarted)
+        {
+            coroutineStarted = true;
+            enemy.StartCoroutine(InitConstruction());
+        } 
+            
         if (initPathConstruct)
         {
             enemy.walk = true;
             enemy.transform.position = 
                 Vector3.MoveTowards(enemy.transform.position, path[0].transform.position, Time.deltaTime * patrolSpeed);
 
-            TryPointAt(enemy.patrolPoints[patrolIndex].transform.position);
+            TryPointAt(path[0].transform.position);
 
             if (Vector3.Distance(enemy.transform.position, path[0].transform.position) <= 0.05f)
             {
@@ -94,13 +99,12 @@ public class PatrolStrategy : BaseEnemy, IStrategy
     {
         enemy.walk = false;
         enemy.run = false;
-        enemy.idle = true;
+        enemy.idle = false;
         yield return new WaitForSeconds(1f);
         path = enemy.pathFinder.DrawPath(enemy.transform.position, enemy.patrolPoints[0].position);
         initPathConstruct = true;
     }
 }
-
 
 public class ChaseStrategy : BaseEnemy, IStrategy
 {
@@ -115,8 +119,23 @@ public class ChaseStrategy : BaseEnemy, IStrategy
     public Node.NodeStatus Evaluate()
     {
         Debug.Log("ChaseStrategy");
+
+        if (enemy.CanAttack())
+        {
+            enemy.canAttack = true;
+            initPlayerPath = false;
+            return Node.NodeStatus.SUCCESS;
+        }
+
+        if (enemy.damageTaken)
+        {
+            initPlayerPath = false;
+            return Node.NodeStatus.SUCCESS;
+        }
+
         if (!initPlayerPath)
         {
+            enemy.idle = false;
             path = enemy.pathFinder.DrawPath(enemy.transform.position, playerController.transform.position);
             
             initPlayerPath = true;
@@ -129,34 +148,34 @@ public class ChaseStrategy : BaseEnemy, IStrategy
             return Node.NodeStatus.SUCCESS;    
         }
 
-        TryPointAt(playerController.centerPoint.transform.position);
-
-        if (initPlayerPath)
+        if(path.Count > 0)
         {
-            if (Vector3.Distance(enemy.centerPoint.transform.position, playerController.centerPoint.transform.position) <= distance)
+            TryPointAt(path[0].transform.position);
+            if (initPlayerPath)
             {
-                enemy.walk = true;
-                enemy.run = false;
+                if (Vector3.Distance(enemy.centerPoint.transform.position, playerController.centerPoint.transform.position) <= distance)
+                {
+                    enemy.walk = true;
+                    enemy.run = false;
+                }
+                else
+                {
+                    enemy.walk = false;
+                    enemy.run = true;
+                }
+
+                enemy.transform.position =
+                  Vector3.MoveTowards(enemy.transform.position, path[0].transform.position, Time.deltaTime * (enemy.run ? chaseSpeedInLongRange : chaseSpeedInCloseRange));
+                if (Vector3.Distance(enemy.transform.position, path[0].transform.position) <= 0.05f)
+                {
+                    List<PathGrid> newPath = enemy.pathFinder.DrawPath(enemy.transform.position, playerController.transform.position);
+                    path = newPath;
+                    Debug.Log("Path changed");
+                }
             }
-            else
-            {
-                enemy.walk = false;
-                enemy.run = true;
-            }
-                
-            enemy.transform.position =
-              Vector3.MoveTowards(enemy.transform.position, path[0].transform.position, Time.deltaTime * (enemy.run ? chaseSpeedInLongRange : chaseSpeedInCloseRange));
-            if (Vector3.Distance(enemy.transform.position, path[0].transform.position) <= 0.05f)
-            {
-                List<PathGrid> newPath = enemy.pathFinder.DrawPath(enemy.transform.position, playerController.transform.position);
-                path = newPath;
-                Debug.Log("Path changed");
-            }
-        }
-       
+        }        
         return Node.NodeStatus.RUNNING;
     }
-
 
 }
 
@@ -170,24 +189,38 @@ public class MoveToLastSeenPositionStrategy : BaseEnemy, IStrategy
     public Node.NodeStatus Evaluate()
     {
         Debug.Log("MoveToLastSeen Strategy");
-
-        if (!initPlayerPath)
-        {
-            path = enemy.pathFinder.DrawPath(enemy.transform.position, enemy.lastSeenPos);
-            foreach (var pathgrid in path)
-            {
-                Debug.Log($"Y:{pathgrid.Y}--X:{pathgrid.X}");
-            }
-            initPlayerPath = true;
-        }
-        
         if (enemy.CanChase())
         {
             initPlayerPath = false;
             return Node.NodeStatus.SUCCESS;
         }
 
-        TryPointAt(enemy.lastSeenPos);
+        if (enemy.CanAttack())
+        {
+            enemy.canAttack = true;
+            initPlayerPath = false;
+            return Node.NodeStatus.SUCCESS;
+        }
+
+        if (!initPlayerPath)
+        {
+            enemy.idle = false;
+            path = enemy.pathFinder.DrawPath(enemy.transform.position, enemy.lastSeenPos);
+            foreach (var pathgrid in path)
+            {
+                //Debug.Log($"Y:{pathgrid.Y}--X:{pathgrid.X}");
+            }
+            initPlayerPath = true;
+        }
+        
+        if (enemy.damageTaken)
+        {
+            initPlayerPath = false;
+            return Node.NodeStatus.SUCCESS;
+        }
+
+
+        TryPointAt(path[0].transform.position);
 
         enemy.transform.position = Vector3.MoveTowards(enemy.transform.position, path[0].transform.position, Time.deltaTime * moveSpeed);
 
@@ -209,12 +242,108 @@ public class MoveToLastSeenPositionStrategy : BaseEnemy, IStrategy
 
 public class AttackStrategy : BaseEnemy, IStrategy
 {
+    AnimatorStateInfo stateInfo;
     public AttackStrategy(Enemy enemy) : base(enemy)
     {
     }
 
     public Node.NodeStatus Evaluate()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Attack Strategy");
+        enemy.idle = false;
+        enemy.attack = true;
+        stateInfo = enemy.enemyAnimator.GetCurrentAnimatorStateInfo(0);
+
+        if (enemy.damageTaken)
+        {
+            enemy.attack = false;
+            return Node.NodeStatus.SUCCESS;
+        }
+
+        if (!TryPointAt(playerController.transform.position))
+            return Node.NodeStatus.RUNNING;
+
+        if (enemy.enemyAnimator.IsInTransition(0)) return Node.NodeStatus.RUNNING;
+           
+          
+        if (stateInfo.IsName("attack"))
+        {
+            if (stateInfo.normalizedTime >= 1)
+            {
+                enemy.attack = false;
+                enemy.idle = true;
+                return Node.NodeStatus.SUCCESS;
+            }
+        }
+           
+        return Node.NodeStatus.RUNNING;
+
+    }
+}
+
+
+public class DamageTakenStrategy : BaseEnemy, IStrategy
+{
+    AnimatorStateInfo stateInfo;
+    bool forceToThisState;
+    public DamageTakenStrategy(Enemy enemy) : base(enemy)
+    {
+
+    }
+
+    public Node.NodeStatus Evaluate()
+    {
+        Debug.Log("DamageTaken Strategy");
+
+        enemy.damageTaken = false;
+        stateInfo = enemy.enemyAnimator.GetCurrentAnimatorStateInfo(0);
+
+        if (enemy.enemyAnimator.IsInTransition(0))
+        {
+            if (!forceToThisState)
+            {
+                enemy.attack = false;
+                forceToThisState = true;
+                enemy.enemyAnimator.Play("damage_taken", 0, 0);
+
+            }
+            return Node.NodeStatus.RUNNING;
+        }
+
+        if (stateInfo.IsName("damage_taken"))
+        {
+            if (stateInfo.normalizedTime >= 1)
+            {
+                Debug.Log("Exited");
+                if (enemy.healthAmount <= 0)
+                {
+                    enemy.isDead = true;
+                    if (playerController.enemiesInRange.Contains(enemy))
+                        playerController.enemiesInRange.Remove(enemy);
+
+                }
+                if (!enemy.isDead)
+                    enemy.idle = true;
+                forceToThisState = false;
+                return Node.NodeStatus.SUCCESS;
+            }
+        }
+
+        return Node.NodeStatus.RUNNING;
+    }
+
+
+}
+
+public class DeathStrategy : BaseEnemy, IStrategy
+{
+    public DeathStrategy(Enemy enemy) : base(enemy)
+    {
+    }
+
+    public Node.NodeStatus Evaluate()
+    {
+        Debug.Log("Death Strategy");
+        return Node.NodeStatus.RUNNING; 
     }
 }

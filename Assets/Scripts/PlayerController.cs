@@ -312,6 +312,8 @@ public class PlayerController : MonoBehaviour
         anim.SetLayerWeight(3, endPoint);
     }
 
+    public bool IsAttacking() => primaryAttack || secondaryAttack || chargeAttack || kick;
+
     public bool ShouldFlicker() => currentHealth <= 30f;
 
     public void ReadyFortSecondaryMeleeAttack() => StartCoroutine(ComboFrame());

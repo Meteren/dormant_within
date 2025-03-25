@@ -6,9 +6,10 @@ using UnityEngine.UIElements;
 
 public class Enemy : MonoBehaviour
 {
-    PlayerController playerConyroller => 
+    PlayerController playerController => 
         GameManager.instance.blackboard.TryGetValue("PlayerController", out PlayerController _controller) ? _controller : null;
-    [SerializeField] private int healthAmount;
+    [Header("Health")]
+    public int healthAmount;
 
     [Header("PathFinder")]
     public PathFinder pathFinder;
@@ -16,6 +17,7 @@ public class Enemy : MonoBehaviour
     [Header("LOS")]
     [SerializeField] private int gridRadius;
     [SerializeField] private float checkAreaRadius;
+    [SerializeField] private float attackRange;
 
     [Header("Patrol Points")]
     public List<Transform> patrolPoints;
@@ -45,13 +47,20 @@ public class Enemy : MonoBehaviour
     public bool run;
     public bool idle;
     public bool isDead;
+    public bool canAttack;
+    public bool damageTaken;
+    public bool attack;
 
     [Header("Last Seen Position")]
     public Vector3 lastSeenPos;
 
-    protected Animator enemyAnimator;
+    [Header("Animator")]
+    public Animator enemyAnimator;
+
+    [HideInInspector] public Rigidbody rb;
     private void Start()
     {
+        rb = GetComponent<Rigidbody>();
         enemyAnimator = GetComponent<Animator>();
         playerMask = LayerMask.GetMask("Player");
         pathFinder = GetComponent<PathFinder>();
@@ -62,23 +71,49 @@ public class Enemy : MonoBehaviour
         SortedSelectorNode mainSelector = new SortedSelectorNode("MainSelector");
         enemyBehaviourTree.AddChild(mainSelector);
 
-        var patrolStrategy = new Leaf("PatrolStrategy", new PatrolStrategy(this),20);
+        var patrolStrategy = new Leaf("PatrolStrategy", new PatrolStrategy(this),30);
         
 
-        SequenceNode chaseSequence = new SequenceNode("ChaseSequnce", 10);
+        SequenceNode chaseSequence = new SequenceNode("ChaseSequnce", 25);
 
         var chaseCondition = new Leaf("ChaseCondition", new Condition(() => CanChase()));
-        var chaseStrategy = new Leaf("ChaseStrategy", new ChaseStrategy(this),10);
+        var chaseStrategy = new Leaf("ChaseStrategy", new ChaseStrategy(this));
         var moveToLastSeenPosStrategy = new Leaf("MoveToLastSeenPos", new MoveToLastSeenPositionStrategy(this));
 
         chaseSequence.AddChild(chaseCondition);
         chaseSequence.AddChild(chaseStrategy);
         chaseSequence.AddChild(moveToLastSeenPosStrategy);
 
+        SequenceNode attackSequence = new SequenceNode("AttackSequence", 20);
+        var attackCondition = new Leaf("AttackCondition", new Condition(() => CanAttack()));
+        var attackStrategy = new Leaf("AttackStrategy", new AttackStrategy(this));
+
+        attackSequence.AddChild(attackCondition);
+        attackSequence.AddChild(attackStrategy);
+
+        SequenceNode damageTakenSequence = new SequenceNode("DamageTakenSequence",15);
+
+        var damageTakenCondition = new Leaf("DamageTakenCondition", new Condition(() => damageTaken));
+        var damageTakenStrategy = new Leaf("DamageTakenStrategy", new DamageTakenStrategy(this));
+
+        damageTakenSequence.AddChild(damageTakenCondition);
+        damageTakenSequence.AddChild(damageTakenStrategy);
+
+
+        SequenceNode deathSequence = new SequenceNode("DeathSequence", 10);
+        var deathCondition = new Leaf("DeathCondition", new Condition(() => isDead));
+        var deathStrategy = new Leaf("DeathStrategy", new DeathStrategy(this));
+
+        deathSequence.AddChild(deathCondition);
+        deathSequence.AddChild(deathStrategy);
+
+
+        mainSelector.AddChild(deathSequence);
+        mainSelector.AddChild(damageTakenSequence);
+        mainSelector.AddChild(attackSequence);
         mainSelector.AddChild(chaseSequence);
         mainSelector.AddChild(patrolStrategy);
 
-        //StartCoroutine(St());
     }
 
     /*private void Update()
@@ -156,20 +191,18 @@ public class Enemy : MonoBehaviour
         enemyAnimator.SetBool("idle",idle);
         enemyAnimator.SetBool("walk", walk);
         enemyAnimator.SetBool("run", run);
+        enemyAnimator.SetBool("damageTaken", damageTaken);
+        enemyAnimator.SetBool("dead", isDead);
+        enemyAnimator.SetBool("attack", attack);
     }
+
     public virtual void OnDamage(int damage)
     {
+        if(!isDead)
+            damageTaken = true;
         healthAmount -= damage;
-        Debug.Log($"Amount of damage inflicted: {damage} - Remained health: {healthAmount}");
+        Debug.Log($"Amount of damage inflicted: {damage} - Remained health: {healthAmount}");  
 
-        if(healthAmount <= 0)
-        {
-            isDead = true;
-            if(playerConyroller.enemiesInRange.Contains(this))
-                playerConyroller.enemiesInRange.Remove(this);   
-            Destroy(gameObject);
-        }
-            
     }
 
     public bool CanChase()
@@ -188,7 +221,7 @@ public class Enemy : MonoBehaviour
 
     private bool IsInLineOfSight()
     {
-        Vector3 rayDirection = playerConyroller.centerPoint.position - transform.position;
+        Vector3 rayDirection = playerController.centerPoint.position - transform.position;
         Ray ray = new Ray(transform.position, rayDirection);
         if (Physics.Raycast(ray, out RaycastHit hit, checkAreaRadius,rayMask,QueryTriggerInteraction.Ignore))
         {
@@ -205,25 +238,12 @@ public class Enemy : MonoBehaviour
 
     }
 
-    private IEnumerator St()
+    public bool CanAttack()
     {
-        yield return new WaitForSeconds(7f);
-        //Debug.Log("Path initted");
-        path = pathFinder.DrawPath(transform.position,patrolPoints[patrolIndex].position);
-        //Debug.Log("Path count:" + path.Count);
-        pathInProgress = true;
-        /*foreach (var pathGrid in path)
-            Debug.Log("Path name:" + pathGrid.name);*/
-
+        if(Vector3.Distance(playerController.transform.position,transform.position) <= attackRange)
+            return true;
+        return false;
     }
-    private bool ShouldPathChange(List<PathGrid> newPath)
-    {
-        if (newPath == null || newPath.Count == 0 || path == null || path.Count == 0)
-            return false;
-
-        return newPath[0] != path[0];
-    }
-
     public float CalculatePriority(PlayerController p_controller) =>
         Vector3.Distance(p_controller.transform.position, transform.position);
 }

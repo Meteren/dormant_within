@@ -5,18 +5,15 @@ using UnityEngine;
 public class Pipe : Weapon
 {
     public override int InflictDamage()
-    {
-        Debug.Log("Damage Inflicted");
-        return 0;
+    {    
+        return playerController.chargeAttack ? 5 : 2;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        
+        if(playerController != null)
+            if (other.TryGetComponent<Enemy>(out Enemy enemy) && playerController.IsAttacking())
+                if(!enemy.isDead)
+                    enemy.OnDamage(InflictDamage());
     }
 }

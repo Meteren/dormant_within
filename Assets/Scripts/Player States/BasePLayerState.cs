@@ -51,12 +51,17 @@ public class BasePlayerState : IState
                 if (!playerController.primaryAttack && !playerController.secondaryAttack)
                     playerController.StartCoroutine(TryCharge());
                 if (playerController.readyToCombo)
+                {
                     playerController.secondaryAttack = true;
+                    playerController.StartCoroutine(SetAttack(start: 0.05f, finish: 0.25f));
+                }
+                    
             }
 
             if(Input.GetMouseButtonUp(0) && playerController.charge)
             {
                 playerController.chargeAttack = true;
+                playerController.StartCoroutine(SetAttack(start: 0.15f, finish: 0.25f));
                 playerController.charge = false;
             }
                 
@@ -91,8 +96,24 @@ public class BasePlayerState : IState
         if (Input.GetMouseButton(0))
             playerController.charge = true;
         else
+        {
             playerController.primaryAttack = true;
+            playerController.StartCoroutine(SetAttack(start: 0.55f, finish: 0.2f));
+        }
+            
 
+    }
+
+    private IEnumerator SetAttack(float start,float finish)
+    {
+        Weapon meleeWeapon = playerController.equippedItem as Weapon;
+        Collider weaponColl = meleeWeapon.GetComponent<Collider>();
+        yield return new WaitForSeconds(start);
+        weaponColl.enabled = true;
+        weaponColl.isTrigger = true;
+        yield return new WaitForSeconds(finish);
+        weaponColl.isTrigger = false;
+        weaponColl.enabled = false;
     }
 
     protected void AimAtClosest()

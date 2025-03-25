@@ -21,12 +21,15 @@ public class Weapon : Item, IEquippable, ICombinable
 
     [Header("Type")]
     public bool isMelee;
+
+    [HideInInspector] protected PlayerController playerController;
     protected new void Start()
     {
         base.Start();
     }
     public virtual void Equip(PlayerController playerController)
     {
+        this.playerController = playerController;
         Transform anchorPosition = FindPositionToAnchor(playerController.transform);
         if (anchorPosition != null)
         {
@@ -48,6 +51,7 @@ public class Weapon : Item, IEquippable, ICombinable
 
     public virtual void Unequip()
     {
+        playerController = null;
         transform.SetParent(null);
         gameObject.SetActive(false);
         
