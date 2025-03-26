@@ -67,6 +67,9 @@ public class PatrolStrategy : BaseEnemy, IStrategy
             coroutineStarted = true;
             enemy.StartCoroutine(InitConstruction());
         } 
+
+        if(enemy.isDead)
+            return Node.NodeStatus.SUCCESS;
             
         if (initPathConstruct)
         {
@@ -148,7 +151,10 @@ public class ChaseStrategy : BaseEnemy, IStrategy
             return Node.NodeStatus.SUCCESS;    
         }
 
-        if(path.Count > 0)
+        if (enemy.isDead)
+            return Node.NodeStatus.SUCCESS;
+
+        if (path.Count > 0)
         {
             TryPointAt(path[0].transform.position);
             if (initPlayerPath)
@@ -219,6 +225,9 @@ public class MoveToLastSeenPositionStrategy : BaseEnemy, IStrategy
             return Node.NodeStatus.SUCCESS;
         }
 
+        if (enemy.isDead)
+            return Node.NodeStatus.SUCCESS;
+
 
         TryPointAt(path[0].transform.position);
 
@@ -246,7 +255,6 @@ public class AttackStrategy : BaseEnemy, IStrategy
     public AttackStrategy(Enemy enemy) : base(enemy)
     {
     }
-
     public Node.NodeStatus Evaluate()
     {
         Debug.Log("Attack Strategy");
@@ -254,22 +262,32 @@ public class AttackStrategy : BaseEnemy, IStrategy
         enemy.attack = true;
         stateInfo = enemy.enemyAnimator.GetCurrentAnimatorStateInfo(0);
 
-        if (enemy.damageTaken)
+        if (enemy.isDead)
         {
             enemy.attack = false;
             return Node.NodeStatus.SUCCESS;
         }
-
+            
+        if (enemy.damageTaken)
+        {
+            enemy.OnStagger(0);
+        }
+            
         if (!TryPointAt(playerController.transform.position))
             return Node.NodeStatus.RUNNING;
 
         if (enemy.enemyAnimator.IsInTransition(0)) return Node.NodeStatus.RUNNING;
-           
-          
+                  
         if (stateInfo.IsName("attack"))
         {
             if (stateInfo.normalizedTime >= 1)
             {
+                if (enemy.stagger)
+                {
+                    enemy.damageTaken = false;
+                    enemy.stagger = false;
+                }
+                    
                 enemy.attack = false;
                 enemy.idle = true;
                 return Node.NodeStatus.SUCCESS;
@@ -280,7 +298,6 @@ public class AttackStrategy : BaseEnemy, IStrategy
 
     }
 }
-
 
 public class DamageTakenStrategy : BaseEnemy, IStrategy
 {
@@ -298,16 +315,24 @@ public class DamageTakenStrategy : BaseEnemy, IStrategy
         enemy.damageTaken = false;
         stateInfo = enemy.enemyAnimator.GetCurrentAnimatorStateInfo(0);
 
-        if (enemy.enemyAnimator.IsInTransition(0))
+        /*if (playerController.idle)
+            return Node.NodeStatus.SUCCESS;*/
+
+        if (enemy.enemyAnimator.IsInTransition(0) || enemy.enemyAnimator.IsInTransition(1))
         {
             if (!forceToThisState)
             {
-                enemy.attack = false;
                 forceToThisState = true;
                 enemy.enemyAnimator.Play("damage_taken", 0, 0);
 
             }
             return Node.NodeStatus.RUNNING;
+        }
+
+        if (enemy.stagger)
+        {
+            forceToThisState = false;
+            return Node.NodeStatus.SUCCESS;
         }
 
         if (stateInfo.IsName("damage_taken"))
@@ -317,12 +342,12 @@ public class DamageTakenStrategy : BaseEnemy, IStrategy
                 Debug.Log("Exited");
                 if (enemy.healthAmount <= 0)
                 {
-                    enemy.isDead = true;
+                    enemy.deathAfterDamage = true;
                     if (playerController.enemiesInRange.Contains(enemy))
                         playerController.enemiesInRange.Remove(enemy);
 
                 }
-                if (!enemy.isDead)
+                if (!enemy.deathAfterDamage)
                     enemy.idle = true;
                 forceToThisState = false;
                 return Node.NodeStatus.SUCCESS;
@@ -332,18 +357,22 @@ public class DamageTakenStrategy : BaseEnemy, IStrategy
         return Node.NodeStatus.RUNNING;
     }
 
-
 }
-
 public class DeathStrategy : BaseEnemy, IStrategy
 {
+    bool handleCollider;
     public DeathStrategy(Enemy enemy) : base(enemy)
     {
     }
-
     public Node.NodeStatus Evaluate()
     {
         Debug.Log("Death Strategy");
+        if (!handleCollider)
+        {
+            enemy.GetComponent<Collider>().enabled = false;
+            handleCollider = false;
+        }           
+        enemy.isDead = true;
         return Node.NodeStatus.RUNNING; 
     }
 }

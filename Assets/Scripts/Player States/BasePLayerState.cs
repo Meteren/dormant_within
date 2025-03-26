@@ -31,17 +31,17 @@ public class BasePlayerState : IState
                 if (!playerController.getStance)
                 {
                     playerController.getStance = true;
+                    playerController.isPressingM2 = true;
                     playerController.idle = true;
                 }
                
             }
             else
             {
-                playerController.aim = true;
-                
+                playerController.isPressingM2 = true;
+                playerController.aim = true;      
             }
-            playerController.isPressingM2 = true;
-
+            
         }
 
         if (playerController.getStance)
@@ -84,8 +84,6 @@ public class BasePlayerState : IState
         if(Input.GetKeyDown(KeyCode.V) && !playerController.shoot && !playerController.primaryAttack && 
             !playerController.secondaryAttack && !playerController.charge && !playerController.chargeAttack)
             playerController.kick = true;
-
-
 
     }
 
@@ -133,6 +131,9 @@ public class BasePlayerState : IState
             playerController.lockedEnemy = GetClosestEnemy();
             lockOn = false;
         }
+
+        if (playerController.lockedEnemy == null)
+            return;
                  
         Weapon weapon = playerController.equippedItem as Weapon;
         Vector3 direction = playerController.lockedEnemy.transform.position - weapon.muzzlePoint.position;
@@ -172,7 +173,7 @@ public class BasePlayerState : IState
         Enemy closestEnemy = null;
         foreach(var enemy in playerController.enemiesInRange)
         {
-            Vector3 direction = enemy.transform.position - playerController.centerPoint.position;
+            Vector3 direction = enemy.centerPoint.position - playerController.centerPoint.position;
             Ray ray = new Ray(playerController.centerPoint.position, direction);
 
             if (Physics.Raycast(ray, out RaycastHit hit, playerController.aimRadius, playerController.aimMask, QueryTriggerInteraction.Ignore))

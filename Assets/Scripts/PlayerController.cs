@@ -41,7 +41,7 @@ public class PlayerController : MonoBehaviour
     public bool readyToCombo;
     public bool charge;
     public bool chargeAttack;
-
+    public bool damageTaken;
 
     [Header("Reference Point")]
     [SerializeField] private Transform reference;
@@ -156,6 +156,12 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Pressing m2:" + isPressingM2);
         if (Input.GetMouseButtonUp(1))
             isPressingM2 = false;
+
+        if (!isPressingM2)
+        {
+            getStance = false;
+        }
+            
         SetRotationDirection();
         UpdateAnimations();
         playerStateMachine.Update();
@@ -163,7 +169,6 @@ public class PlayerController : MonoBehaviour
             OnTakeDamage(20f);
         if (Input.GetKeyDown(KeyCode.H))
             OnHeal(20);
-
     }
 
     private void SetRotationDirection()
@@ -190,6 +195,7 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("kick", kick);
         anim.SetBool("charge", charge);
         anim.SetBool("chargeAttack", chargeAttack);
+        anim.SetBool("damageTaken", damageTaken);
     }
 
     public void SetForwardDirection()
@@ -254,6 +260,11 @@ public class PlayerController : MonoBehaviour
 
     public void OnTakeDamage(float damageAmount)
     {
+        if (damageTaken)
+            damageTaken = false;
+
+        damageTaken = true;
+
         if (isDead)
             return;
 
@@ -306,21 +317,23 @@ public class PlayerController : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             weightValue = Mathf.Lerp(startPoint, endPoint, elapsedTime / duration);
-            anim.SetLayerWeight(3, weightValue);
+            anim.SetLayerWeight(4, weightValue);
             yield return null;
         }
-        anim.SetLayerWeight(3, endPoint);
+        anim.SetLayerWeight(4, endPoint);
     }
 
     public bool IsAttacking() => primaryAttack || secondaryAttack || chargeAttack || kick;
 
     public bool ShouldFlicker() => currentHealth <= 30f;
 
-    public void ReadyFortSecondaryMeleeAttack() => StartCoroutine(ComboFrame());
+    public void ReadyForSecondaryMeleeAttack() => StartCoroutine(ComboFrame());
 
     public void SetSecondaryMeleeAttack() => secondaryAttack = false;
 
-    public void SetChargedAttack() => chargeAttack = false; 
+    public void SetChargedAttack() => chargeAttack = false;
+
+    public void SetDamageTakenState() => damageTaken = false;
 
     public void HandleChargeAtTheEndIfNeeded()
     {

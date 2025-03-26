@@ -50,6 +50,8 @@ public class Enemy : MonoBehaviour
     public bool canAttack;
     public bool damageTaken;
     public bool attack;
+    public bool stagger;
+    public bool deathAfterDamage;
 
     [Header("Last Seen Position")]
     public Vector3 lastSeenPos;
@@ -93,7 +95,7 @@ public class Enemy : MonoBehaviour
 
         SequenceNode damageTakenSequence = new SequenceNode("DamageTakenSequence",15);
 
-        var damageTakenCondition = new Leaf("DamageTakenCondition", new Condition(() => damageTaken));
+        var damageTakenCondition = new Leaf("DamageTakenCondition", new Condition(() => damageTaken && !stagger));
         var damageTakenStrategy = new Leaf("DamageTakenStrategy", new DamageTakenStrategy(this));
 
         damageTakenSequence.AddChild(damageTakenCondition);
@@ -101,7 +103,7 @@ public class Enemy : MonoBehaviour
 
 
         SequenceNode deathSequence = new SequenceNode("DeathSequence", 10);
-        var deathCondition = new Leaf("DeathCondition", new Condition(() => isDead));
+        var deathCondition = new Leaf("DeathCondition", new Condition(() => isDead || deathAfterDamage));
         var deathStrategy = new Leaf("DeathStrategy", new DeathStrategy(this));
 
         deathSequence.AddChild(deathCondition);
@@ -194,15 +196,41 @@ public class Enemy : MonoBehaviour
         enemyAnimator.SetBool("damageTaken", damageTaken);
         enemyAnimator.SetBool("dead", isDead);
         enemyAnimator.SetBool("attack", attack);
+        enemyAnimator.SetBool("stagger", stagger);
+        enemyAnimator.SetBool("deathAfterDamage", deathAfterDamage);
     }
 
+    //for melee weapons
     public virtual void OnDamage(int damage)
     {
-        if(!isDead)
+        if(!isDead || !deathAfterDamage)
             damageTaken = true;
+        if (stagger)
+            stagger = false;
         healthAmount -= damage;
         Debug.Log($"Amount of damage inflicted: {damage} - Remained health: {healthAmount}");  
 
+    }
+
+    //for guns
+    public virtual void OnStagger(int damage)
+    {
+
+        healthAmount -= damage;
+
+        if (healthAmount <= 0)
+        {
+            damageTaken = false;
+            healthAmount = 0;
+            isDead = true;
+        }
+
+        if (stagger)
+            stagger = false;
+
+        if (!isDead)
+            stagger = true;
+              
     }
 
     public bool CanChase()
@@ -218,7 +246,6 @@ public class Enemy : MonoBehaviour
         return false;
             
     }
-
     private bool IsInLineOfSight()
     {
         Vector3 rayDirection = playerController.centerPoint.position - transform.position;
@@ -237,7 +264,11 @@ public class Enemy : MonoBehaviour
         return false;
 
     }
-
+    public void SetStagger()
+    {
+        stagger = false;
+        damageTaken = false;
+    }
     public bool CanAttack()
     {
         if(Vector3.Distance(playerController.transform.position,transform.position) <= attackRange)

@@ -13,7 +13,6 @@ public class InventoryController : MonoBehaviour
             gridMenu.gameObject.SetActive(false);
     }
 
-
     private bool CheckIfMouseInsideMenu()
     {
         bool isInside = 

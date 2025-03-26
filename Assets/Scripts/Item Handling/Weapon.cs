@@ -60,13 +60,16 @@ public class Weapon : Item, IEquippable, ICombinable
     public void OnTryCombine(ItemRepresenter representer)
     {
         Clip clip = representer.representedItem as Clip;
+
+        if (clip == null || isMelee)
+        {
+            UIManager.instance.HandleIndicator($"Can't combine {ToString()} with {representer.representedItem.ToString()}", 2f);
+            return;
+        }
+    
         if (!this.clip.IsFull())
         {
-            if (clip == null)
-            {
-                UIManager.instance.HandleIndicator($"Can't combine {ToString()} with {representer.representedItem.ToString()}", 2f);
-                return;
-            }
+           
             if (!clip.isEmpty)
             {
                 this.clip.IncreaseAmount(clip);

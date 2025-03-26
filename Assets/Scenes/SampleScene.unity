@@ -3291,7 +3291,7 @@ Transform:
   m_GameObject: {fileID: 390222079}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.564, z: 0.234}
+  m_LocalPosition: {x: 0, y: 0.564, z: 0.057}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3560,11 +3560,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 685e871f91b8f4f4f9557dae92d69f24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthAmount: 30
+  healthAmount: 600
   pathFinder: {fileID: 0}
   gridRadius: 20
   checkAreaRadius: 10
-  attackRange: 1.7
+  attackRange: 1.8
   patrolPoints:
   - {fileID: 1870256666}
   - {fileID: 1437297710}
@@ -3583,6 +3583,8 @@ MonoBehaviour:
   canAttack: 0
   damageTaken: 0
   attack: 0
+  stagger: 0
+  deathAfterDamage: 0
   lastSeenPos: {x: 0, y: 0, z: 0}
   enemyAnimator: {fileID: 0}
   rb: {fileID: 0}
@@ -6271,6 +6273,11 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!4 &740676606 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: 23bba0ebdc46c1e4d9a7e3d043325773, type: 3}
+  m_PrefabInstance: {fileID: 1361687194}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &756528212
 GameObject:
   m_ObjectHideFlags: 0
@@ -9051,6 +9058,8 @@ MonoBehaviour:
   canAttack: 0
   damageTaken: 0
   attack: 0
+  stagger: 0
+  deathAfterDamage: 0
   lastSeenPos: {x: 0, y: 0, z: 0}
   enemyAnimator: {fileID: 0}
   rb: {fileID: 0}
@@ -9581,6 +9590,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 23bba0ebdc46c1e4d9a7e3d043325773, type: 3}
       insertIndex: -1
       addedObject: {fileID: 390222080}
+    - targetCorrespondingSourceObject: {fileID: 1852576806548013000, guid: 23bba0ebdc46c1e4d9a7e3d043325773, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1871075952}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 23bba0ebdc46c1e4d9a7e3d043325773, type: 3}
       insertIndex: -1
@@ -10524,6 +10536,8 @@ MonoBehaviour:
   canAttack: 0
   damageTaken: 0
   attack: 0
+  stagger: 0
+  deathAfterDamage: 0
   lastSeenPos: {x: 0, y: 0, z: 0}
   enemyAnimator: {fileID: 0}
   rb: {fileID: 0}
@@ -14304,6 +14318,73 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1870633382}
   m_CullTransparentMesh: 1
+--- !u!1 &1871075951
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1871075952}
+  - component: {fileID: 1871075953}
+  - component: {fileID: 1871075954}
+  m_Layer: 8
+  m_Name: Damage Area
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1871075952
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871075951}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.4757, y: -0.0265, z: -0.2479}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 740676606}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1871075953
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871075951}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.08657403, y: 0.14808725, z: 0.047285568}
+  m_Center: {x: 0.46951696, y: 0.08269846, z: 0.23510268}
+--- !u!114 &1871075954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871075951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df7833eb00d026b45889e531422798c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damageAmount: 10
 --- !u!1 &1904680235
 GameObject:
   m_ObjectHideFlags: 0
@@ -14902,6 +14983,7 @@ MonoBehaviour:
   readyToCombo: 0
   charge: 0
   chargeAttack: 0
+  damageTaken: 0
   reference: {fileID: 1358042803}
   aimRadius: 7
   enemiesInRange: []
@@ -16274,6 +16356,8 @@ MonoBehaviour:
   canAttack: 0
   damageTaken: 0
   attack: 0
+  stagger: 0
+  deathAfterDamage: 0
   lastSeenPos: {x: 0, y: 0, z: 0}
   enemyAnimator: {fileID: 0}
   rb: {fileID: 0}
@@ -16774,6 +16858,8 @@ MonoBehaviour:
   canAttack: 0
   damageTaken: 0
   attack: 0
+  stagger: 0
+  deathAfterDamage: 0
   lastSeenPos: {x: 0, y: 0, z: 0}
   enemyAnimator: {fileID: 0}
   rb: {fileID: 0}

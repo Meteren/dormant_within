@@ -27,11 +27,18 @@ public class IdleState : BasePlayerState
 
         if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.LeftShift) && 
             !playerController.getStance && !playerController.primaryAttack && !playerController.secondaryAttack)
+        {
             playerController.run = true;
+        }          
         else if (Input.GetKey(KeyCode.W))
+        {
             playerController.walk = true;
+        }            
         else if (Input.GetKey(KeyCode.S))
+        {
             playerController.walkBackwards = true;
+        }
+            
         else if (Input.GetKeyDown(KeyCode.C))
             playerController.turnBack = true;
 
@@ -62,8 +69,9 @@ public class WalkState : BasePlayerState
     {
         base.Update();
         Debug.Log("Walk");
-        if(Input.GetKeyUp(KeyCode.W))
+        if (!Input.GetKey(KeyCode.W))
             playerController.idle = true;
+           
         if (Input.GetKeyDown(KeyCode.LeftShift) && !playerController.getStance && !playerController.primaryAttack && !playerController.secondaryAttack)
             playerController.run = true;
 
@@ -92,8 +100,10 @@ public class WalkBackwardsState : BasePlayerState
     {
         base.Update();
         Debug.Log("WalkBackwards");
-        if (Input.GetKeyUp(KeyCode.S))
+
+        if (!Input.GetKey(KeyCode.S))
             playerController.idle = true;
+        
         if (Input.GetKeyDown(KeyCode.LeftShift))
             playerController.turnBack = true;
         playerController.rb.velocity = new Vector3(playerController.ForwardDirection.x * backwardsSpeed * -1,
@@ -281,7 +291,7 @@ public class ShootState : BasePlayerState
         {
             Debug.Log($"{hit.transform.name} hitted.");
             if (hit.transform.TryGetComponent<Enemy>(out Enemy enemy))
-                enemy.OnDamage(weapon.InflictDamage());
+                enemy.OnStagger(weapon.InflictDamage());
         }
         else
             Debug.Log("Missed");
@@ -325,4 +335,5 @@ public class KickState : BasePlayerState
 
     }
 }
+
 
