@@ -13,7 +13,14 @@ public class Pipe : Weapon
     {
         if(playerController != null)
             if (other.TryGetComponent<Enemy>(out Enemy enemy) && playerController.IsAttacking())
-                if(!enemy.isDead)
+                if (!enemy.isDead)
+                {
+                    enemy.damagePosition = other.ClosestPoint(transform.position);
+                    Debug.Log($"Trigger point: {other.ClosestPoint(transform.position)} -- Center Point: {enemy.centerPoint.position}");
+
                     enemy.OnDamage(InflictDamage());
+
+                }
+                    
     }
 }

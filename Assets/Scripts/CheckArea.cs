@@ -4,10 +4,18 @@ public class CheckArea : MonoBehaviour
 {
     private ICollectible itemToBeCollected;
     private IInteractable interactedObject;
+
+    private PlayerController playerController;
+
+    private void Start()
+    {
+        playerController = GetComponentInParent<PlayerController>();
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<ICollectible>(out ICollectible collectible))
-            itemToBeCollected = collectible;
+            if(collectible != playerController.equippedItem as ICollectible)
+                itemToBeCollected = collectible;
         if(other.TryGetComponent<PuzzleObject>(out PuzzleObject puzzleObject))
             GetComponentInParent<PlayerController>().interactedPuzzleObject = puzzleObject;
         if(other.TryGetComponent<IInteractable>(out IInteractable interactable))
@@ -18,7 +26,8 @@ public class CheckArea : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (other.TryGetComponent<ICollectible>(out ICollectible collectible))
-            itemToBeCollected = null;
+            if (collectible != playerController.equippedItem as ICollectible)
+                itemToBeCollected = null;
         if (other.TryGetComponent<PuzzleObject>(out PuzzleObject puzzleObject))
             GetComponentInParent<PlayerController>().interactedPuzzleObject = null;
         if (other.TryGetComponent<IInteractable>(out IInteractable interactable))

@@ -291,7 +291,11 @@ public class ShootState : BasePlayerState
         {
             Debug.Log($"{hit.transform.name} hitted.");
             if (hit.transform.TryGetComponent<Enemy>(out Enemy enemy))
+            {
+                enemy.damagePosition = hit.point;
                 enemy.OnStagger(weapon.InflictDamage());
+            }
+                
         }
         else
             Debug.Log("Missed");

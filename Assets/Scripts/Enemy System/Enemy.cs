@@ -59,7 +59,12 @@ public class Enemy : MonoBehaviour
     [Header("Animator")]
     public Animator enemyAnimator;
 
+    [Header("Blood Particle")]
+    [SerializeField] private ParticleSystem particleReference;
+    public Vector3 damagePosition;
+
     [HideInInspector] public Rigidbody rb;
+    
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -95,7 +100,7 @@ public class Enemy : MonoBehaviour
 
         SequenceNode damageTakenSequence = new SequenceNode("DamageTakenSequence",15);
 
-        var damageTakenCondition = new Leaf("DamageTakenCondition", new Condition(() => damageTaken && !stagger));
+        var damageTakenCondition = new Leaf("DamageTakenCondition", new Condition(() => damageTaken && !stagger && !attack));
         var damageTakenStrategy = new Leaf("DamageTakenStrategy", new DamageTakenStrategy(this));
 
         damageTakenSequence.AddChild(damageTakenCondition);
@@ -204,7 +209,11 @@ public class Enemy : MonoBehaviour
     public virtual void OnDamage(int damage)
     {
         if(!isDead || !deathAfterDamage)
+        {
             damageTaken = true;
+            SplatBlood(damagePosition);
+        }
+           
         if (stagger)
             stagger = false;
         healthAmount -= damage;
@@ -216,7 +225,9 @@ public class Enemy : MonoBehaviour
     public virtual void OnStagger(int damage)
     {
 
+        Debug.Log("Splash Blood");
         healthAmount -= damage;
+        SplatBlood(damagePosition);
 
         if (healthAmount <= 0)
         {
@@ -277,4 +288,11 @@ public class Enemy : MonoBehaviour
     }
     public float CalculatePriority(PlayerController p_controller) =>
         Vector3.Distance(p_controller.transform.position, transform.position);
+
+    private void SplatBlood(Vector3 position)
+    {
+        ParticleSystem bloodParticle = Instantiate(particleReference);
+        bloodParticle.transform.position = position;
+        bloodParticle.Play();
+    }
 }

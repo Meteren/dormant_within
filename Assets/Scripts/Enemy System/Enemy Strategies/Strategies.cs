@@ -270,6 +270,7 @@ public class AttackStrategy : BaseEnemy, IStrategy
             
         if (enemy.damageTaken)
         {
+            enemy.damageTaken = false;
             enemy.OnStagger(0);
         }
             
@@ -284,7 +285,6 @@ public class AttackStrategy : BaseEnemy, IStrategy
             {
                 if (enemy.stagger)
                 {
-                    enemy.damageTaken = false;
                     enemy.stagger = false;
                 }
                     
@@ -313,6 +313,7 @@ public class DamageTakenStrategy : BaseEnemy, IStrategy
         Debug.Log("DamageTaken Strategy");
 
         enemy.damageTaken = false;
+        enemy.idle = false;
         stateInfo = enemy.enemyAnimator.GetCurrentAnimatorStateInfo(0);
 
         /*if (playerController.idle)
