@@ -4,10 +4,20 @@ using UnityEngine;
 
 public class DamageArea : MonoBehaviour
 {
-    [SerializeField] private float damageAmount;
+    [SerializeField] private int damageAmount;
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<PlayerController>(out PlayerController playerController))
-            playerController.OnTakeDamage(damageAmount);
+        if(GetComponentInParent<PlayerController>() == null)
+        {
+            if (other.TryGetComponent<PlayerController>(out PlayerController playerController))
+                playerController.OnTakeDamage(damageAmount);
+        }
+        else
+        {
+            if (other.TryGetComponent<Enemy>(out Enemy enemy))
+                enemy.OnDamage(damageAmount);
+                                
+        }
+          
     }
 }

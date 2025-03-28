@@ -316,9 +316,6 @@ public class DamageTakenStrategy : BaseEnemy, IStrategy
         enemy.idle = false;
         stateInfo = enemy.enemyAnimator.GetCurrentAnimatorStateInfo(0);
 
-        /*if (playerController.idle)
-            return Node.NodeStatus.SUCCESS;*/
-
         if (enemy.enemyAnimator.IsInTransition(0) || enemy.enemyAnimator.IsInTransition(1))
         {
             if (!forceToThisState)

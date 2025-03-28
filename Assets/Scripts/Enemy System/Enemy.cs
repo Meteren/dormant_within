@@ -211,7 +211,8 @@ public class Enemy : MonoBehaviour
         if(!isDead || !deathAfterDamage)
         {
             damageTaken = true;
-            SplatBlood(damagePosition);
+            if(!playerController.kick)
+                SplatBlood(damagePosition);
         }
            
         if (stagger)
@@ -227,7 +228,8 @@ public class Enemy : MonoBehaviour
 
         Debug.Log("Splash Blood");
         healthAmount -= damage;
-        SplatBlood(damagePosition);
+        if(!playerController.kick)
+            SplatBlood(damagePosition);
 
         if (healthAmount <= 0)
         {

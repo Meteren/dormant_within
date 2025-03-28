@@ -334,8 +334,7 @@ public class KickState : BasePlayerState
             {
                 Debug.Log("Exited");
                 playerController.idle = true;
-            }
-                
+            }            
 
     }
 }
