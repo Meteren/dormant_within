@@ -323,7 +323,7 @@ public class PlayerController : MonoBehaviour
 
     public bool IsAttacking() => primaryAttack || secondaryAttack || chargeAttack || kick;
 
-    public bool ShouldFlicker() => currentHealth <= 30f;
+    public bool ShouldFlicker() => currentHealth < 30f;
 
     public void ReadyForSecondaryMeleeAttack() => StartCoroutine(ComboFrame());
 
